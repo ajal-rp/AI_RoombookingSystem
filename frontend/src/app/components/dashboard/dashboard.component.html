@@ -1,0 +1,131 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Dashboard</h1>
+      <p class="subtitle">Welcome back! Here's what's happening today.</p>
+    </div>
+    <div class="header-actions">
+      <app-button variant="outline" icon="refresh" (clicked)="loadDashboardData()">
+        Refresh
+      </app-button>
+      <app-button variant="primary" icon="add" routerLink="/dashboard/requests/new">
+        Book Room
+      </app-button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <app-kpi-card
+      label="Total Rooms"
+      [value]="kpiData.totalRooms"
+      icon="meeting_room"
+      iconBackground="var(--color-primary)"
+      [loading]="loading">
+    </app-kpi-card>
+
+    <app-kpi-card
+      label="Available Now"
+      [value]="kpiData.availableNow"
+      icon="check_circle"
+      iconBackground="var(--color-accent)"
+      [loading]="loading">
+    </app-kpi-card>
+
+    <app-kpi-card
+      label="Pending Requests"
+      [value]="kpiData.pendingRequests"
+      icon="schedule"
+      iconBackground="var(--color-warning)"
+      [loading]="loading">
+    </app-kpi-card>
+
+    <app-kpi-card
+      label="Today's Meetings"
+      [value]="kpiData.todaysMeetings"
+      icon="event"
+      iconBackground="var(--color-info)"
+      [loading]="loading">
+    </app-kpi-card>
+  </div>
+
+  <!-- Mini Calendar Strip -->
+  <app-card title="This Week" class="calendar-card">
+    <div class="calendar-strip">
+      <div 
+        *ngFor="let day of upcomingDays" 
+        class="calendar-day"
+        [class.today]="isToday(day)">
+        <div class="day-name">{{ getDayName(day) }}</div>
+        <div class="day-number">{{ getDayNumber(day) }}</div>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Upcoming Meetings -->
+  <app-card title="Upcoming Meetings" class="meetings-card">
+    <div header class="card-header-actions">
+      <app-button variant="ghost" size="sm" icon="more_vert"></app-button>
+    </div>
+
+    <div class="meetings-list" *ngIf="!loading && upcomingMeetings.length > 0">
+      <div class="meeting-item" *ngFor="let meeting of upcomingMeetings">
+        <div class="meeting-icon">
+          <mat-icon>event</mat-icon>
+        </div>
+        <div class="meeting-details">
+          <div class="meeting-room">{{ meeting.roomName }}</div>
+          <div class="meeting-purpose">{{ meeting.purpose }}</div>
+          <div class="meeting-time">
+            {{ formatTime(meeting.startTime) }} - {{ formatTime(meeting.endTime) }}
+          </div>
+        </div>
+        <app-badge [variant]="getStatusVariant(meeting.status)">
+          {{ meeting.status }}
+        </app-badge>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && upcomingMeetings.length === 0">
+      <mat-icon>event_busy</mat-icon>
+      <p>No upcoming meetings</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="skeleton-item" *ngFor="let item of [1,2,3]"></div>
+    </div>
+
+    <div footer class="card-footer-actions">
+      <app-button variant="outline" size="sm" routerLink="/dashboard/requests" [fullWidth]="true">
+        View All Bookings
+      </app-button>
+    </div>
+  </app-card>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-grid">
+    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/rooms']" class="action-card">
+      <div class="action-content">
+        <mat-icon class="action-icon">view_list</mat-icon>
+        <h3>Browse Rooms</h3>
+        <p>View all available conference rooms</p>
+      </div>
+    </app-card>
+
+    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/calendar']" class="action-card">
+      <div class="action-content">
+        <mat-icon class="action-icon">calendar_month</mat-icon>
+        <h3>Calendar View</h3>
+        <p>See all bookings in calendar format</p>
+      </div>
+    </app-card>
+
+    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/requests']" class="action-card">
+      <div class="action-content">
+        <mat-icon class="action-icon">pending_actions</mat-icon>
+        <h3>My Requests</h3>
+        <p>Manage your booking requests</p>
+      </div>
+    </app-card>
+  </div>
+</div>

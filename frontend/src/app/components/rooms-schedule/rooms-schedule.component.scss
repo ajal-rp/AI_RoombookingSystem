@@ -1,0 +1,327 @@
+.rooms-schedule-container {
+  padding: var(--spacing-lg);
+  max-width: 1600px;
+  margin: 0 auto;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+// Page Header
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+
+  .header-content {
+    flex: 1;
+    min-width: 250px;
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 8px 0;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #8b5cf6;
+      }
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+
+    button {
+      border-radius: var(--radius-md);
+      text-transform: none;
+      font-weight: 600;
+      padding: 10px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      
+      mat-icon {
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+.status-legend {
+  margin-bottom: var(--spacing-lg);
+  flex-shrink: 0;
+
+  mat-card {
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: none;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    align-items: center;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .status-chip {
+        font-size: 13px;
+        font-weight: 600;
+        min-height: 36px;
+        padding: 8px 18px;
+        border-radius: 18px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        &.available {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+        }
+
+        &.occupied {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+        }
+
+        &.reserved {
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: white;
+        }
+      }
+
+      span {
+        font-size: 14px;
+        color: white;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.table-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+
+  .table-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .rooms-table {
+      width: 100%;
+      background: white;
+
+      th {
+        background: #f9fafb;
+        color: #374151;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 24px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      td {
+        padding: 20px 24px;
+        color: #111827;
+        font-size: 14px;
+        border-bottom: 1px solid #f3f4f6;
+
+        &.room-name {
+          font-weight: 600;
+        }
+
+        &.text-center {
+          text-align: center;
+        }
+
+        &.bookings-count {
+          font-weight: 600;
+          color: #3b82f6;
+          font-size: 16px;
+        }
+
+        &.booking-cell {
+          .booking-info {
+            line-height: 1.6;
+
+            .booking-name {
+              font-weight: 600;
+              color: #111827;
+              margin-bottom: 4px;
+            }
+
+            .booking-time {
+              color: #6b7280;
+              font-size: 13px;
+            }
+
+            .booking-purpose {
+              color: #6b7280;
+              font-size: 13px;
+            }
+          }
+
+          .no-booking {
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 13px;
+          }
+        }
+      }
+
+      tr.mat-row {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: #f9fafb;
+        }
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 48px 24px !important;
+
+        .no-data-message {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          color: #9ca3af;
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            opacity: 0.5;
+          }
+
+          p {
+            margin: 0;
+            font-size: 16px;
+          }
+        }
+      }
+    }
+
+    mat-paginator {
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+  }
+}
+
+// Status badge styling
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &.status-available {
+    background: #10b981;
+    color: white;
+  }
+
+  &.status-occupied {
+    background: #ef4444;
+    color: white;
+  }
+
+  &.status-reserved {
+    background: #f59e0b;
+    color: white;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .rooms-schedule-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    .header-content h1 {
+      font-size: 24px;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  .status-legend .legend-items {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .table-container {
+    .rooms-table {
+      th, td {
+        padding: 12px 16px;
+      }
+    }
+  }
+}

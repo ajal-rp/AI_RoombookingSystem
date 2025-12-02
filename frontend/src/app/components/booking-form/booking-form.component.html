@@ -1,0 +1,276 @@
+<div class="booking-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-button" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>
+        <mat-icon>{{ isEditMode ? 'edit_calendar' : 'event_available' }}</mat-icon>
+        {{ isEditMode ? 'Update Booking Request' : 'Request Conference Room' }}
+      </h1>
+      <p class="subtitle">{{ isEditMode ? 'Modify your booking details below' : 'Fill in the details to reserve a conference room' }}</p>
+    </div>
+  </div>
+
+  <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+    <div class="form-layout">
+      <!-- Left Column: Form Fields -->
+      <div class="form-column">
+        <app-card>
+          <div class="card-header">
+            <h2>Booking Details</h2>
+          </div>
+
+          <!-- Room Selection -->
+          <div class="form-group">
+            <label class="form-label">
+              <mat-icon>meeting_room</mat-icon>
+              Conference Room *
+            </label>
+            <div class="input-wrapper">
+              <select class="form-control modern-select" formControlName="roomId">
+                <option value="">Select a room</option>
+                <option *ngFor="let room of rooms" [value]="room.id">
+                  {{ room.name }} ({{ room.capacity }} capacity)
+                </option>
+              </select>
+              <mat-icon class="input-icon">expand_more</mat-icon>
+            </div>
+            <div class="form-error" *ngIf="bookingForm.get('roomId')?.touched && bookingForm.get('roomId')?.invalid">
+              <mat-icon>error</mat-icon>
+              {{ getFieldError('roomId') }}
+            </div>
+          </div>
+
+          <!-- Date -->
+          <div class="form-group">
+            <label class="form-label">
+              <mat-icon>calendar_today</mat-icon>
+              Date *
+            </label>
+            <div class="input-wrapper">
+              <input 
+                matInput 
+                [matDatepicker]="picker" 
+                formControlName="date" 
+                [min]="minDate" 
+                placeholder="Choose a date"
+                class="form-control modern-input"
+                readonly>
+              <mat-icon class="input-icon">calendar_today</mat-icon>
+              <mat-datepicker-toggle matSuffix [for]="picker" class="date-toggle"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </div>
+            <div class="form-error" *ngIf="bookingForm.get('date')?.touched && bookingForm.get('date')?.invalid">
+              <mat-icon>error</mat-icon>
+              {{ getFieldError('date') }}
+            </div>
+          </div>
+
+          <!-- Time Range -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>schedule</mat-icon>
+                Start Time *
+              </label>
+              <div class="input-wrapper">
+                <select class="form-control modern-select" formControlName="startTime">
+                  <option value="">Select time</option>
+                  <option *ngFor="let time of timeSlots" [value]="time">{{ time }}</option>
+                </select>
+                <mat-icon class="input-icon">access_time</mat-icon>
+              </div>
+              <div class="form-error" *ngIf="bookingForm.get('startTime')?.touched && bookingForm.get('startTime')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('startTime') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>schedule</mat-icon>
+                End Time *
+              </label>
+              <div class="input-wrapper">
+                <select class="form-control modern-select" formControlName="endTime">
+                  <option value="">Select time</option>
+                  <option *ngFor="let time of timeSlots" [value]="time">{{ time }}</option>
+                </select>
+                <mat-icon class="input-icon">access_time</mat-icon>
+              </div>
+              <div class="form-error" *ngIf="bookingForm.get('endTime')?.touched && bookingForm.get('endTime')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('endTime') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendees -->
+          <div class="form-group">
+            <label class="form-label">
+              <mat-icon>group</mat-icon>
+              Number of Attendees
+            </label>
+            <div class="input-wrapper">
+              <input type="number" class="form-control modern-input" formControlName="attendees" min="1" placeholder="e.g., 5">
+              <mat-icon class="input-icon">group</mat-icon>
+            </div>
+          </div>
+
+          <!-- Purpose -->
+          <div class="form-group">
+            <label class="form-label">
+              <mat-icon>description</mat-icon>
+              Purpose of Meeting *
+            </label>
+            <div class="input-wrapper">
+              <textarea
+                class="form-control modern-textarea"
+                formControlName="purpose"
+                rows="4"
+                placeholder="Describe the purpose of this meeting (minimum 10 characters)"></textarea>
+            </div>
+            <div class="form-hint" *ngIf="!bookingForm.get('purpose')?.touched">
+              Minimum 10 characters, maximum 500 characters
+            </div>
+            <div class="form-error" *ngIf="bookingForm.get('purpose')?.touched && bookingForm.get('purpose')?.invalid">
+              <mat-icon>error</mat-icon>
+              {{ getFieldError('purpose') }}
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">
+              <mat-icon>notes</mat-icon>
+              Additional Notes
+            </label>
+            <div class="input-wrapper">
+              <textarea
+                class="form-control modern-textarea"
+                formControlName="notes"
+                rows="3"
+                placeholder="Any special requirements or additional information (optional)"></textarea>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Column: Summary -->
+      <div class="summary-column">
+        <app-card class="summary-card">
+          <div class="card-header">
+            <h2>Booking Summary</h2>
+          </div>
+
+          <div class="summary-content" *ngIf="selectedRoom; else noRoomSelected">
+            <!-- Room Info -->
+            <div class="summary-section">
+              <div class="summary-label">Room</div>
+              <div class="summary-value">
+                <mat-icon>meeting_room</mat-icon>
+                {{ selectedRoom.name }}
+              </div>
+            </div>
+
+            <!-- Location -->
+            <div class="summary-section" *ngIf="selectedRoom.location">
+              <div class="summary-label">Location</div>
+              <div class="summary-value">
+                <mat-icon>place</mat-icon>
+                {{ selectedRoom.location }}
+              </div>
+            </div>
+
+            <!-- Capacity -->
+            <div class="summary-section">
+              <div class="summary-label">Capacity</div>
+              <div class="summary-value">
+                <mat-icon>group</mat-icon>
+                {{ selectedRoom.capacity }} people
+              </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="summary-section" *ngIf="selectedRoom.amenities && selectedRoom.amenities.length > 0">
+              <div class="summary-label">Available Amenities</div>
+              <div class="amenities-list">
+                <span class="amenity-chip" *ngFor="let amenity of selectedRoom.amenities">
+                  {{ amenity }}
+                </span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Date -->
+            <div class="summary-section" *ngIf="bookingForm.get('date')?.value">
+              <div class="summary-label">Date</div>
+              <div class="summary-value highlight">{{ formattedDate }}</div>
+            </div>
+
+            <!-- Time -->
+            <div class="summary-section" *ngIf="bookingForm.get('startTime')?.value && bookingForm.get('endTime')?.value">
+              <div class="summary-label">Time</div>
+              <div class="summary-value highlight">
+                {{ bookingForm.get('startTime')?.value }} - {{ bookingForm.get('endTime')?.value }}
+              </div>
+            </div>
+
+            <!-- Duration -->
+            <div class="summary-section" *ngIf="bookingForm.get('startTime')?.value && bookingForm.get('endTime')?.value && duration">
+              <div class="summary-label">Duration</div>
+              <div class="summary-value highlight">{{ duration }}</div>
+            </div>
+
+            <!-- Purpose -->
+            <div class="summary-section" *ngIf="bookingForm.get('purpose')?.value">
+              <div class="summary-label">Purpose</div>
+              <div class="summary-value">
+                <mat-icon>description</mat-icon>
+                {{ bookingForm.get('purpose')?.value }}
+              </div>
+            </div>
+
+            <!-- Attendees -->
+            <div class="summary-section" *ngIf="bookingForm.get('attendees')?.value">
+              <div class="summary-label">Attendees</div>
+              <div class="summary-value">
+                <mat-icon>people</mat-icon>
+                {{ bookingForm.get('attendees')?.value }} people
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRoomSelected>
+            <div class="no-selection">
+              <mat-icon>info</mat-icon>
+              <p>Select a room to see booking details</p>
+            </div>
+          </ng-template>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <app-button
+              variant="outline"
+              [fullWidth]="true"
+              (clicked)="cancel()"
+              [disabled]="submitting">
+              Cancel
+            </app-button>
+            <app-button
+              variant="primary"
+              [fullWidth]="true"
+              type="submit"
+              [disabled]="bookingForm.invalid || submitting"
+              [loading]="submitting">
+              {{ isEditMode ? 'Update Booking' : 'Submit Request' }}
+            </app-button>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </form>
+</div>

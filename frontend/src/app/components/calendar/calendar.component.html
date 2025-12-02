@@ -1,0 +1,158 @@
+<div class="calendar-container">
+  <div class="calendar-header">
+    <div class="header-left">
+      <h1>{{ viewMode === 'month' ? currentMonth + ' ' + currentYear : weekRange }}</h1>
+      <div class="view-switcher">
+        <button
+          class="view-btn"
+          [class.active]="viewMode === 'month'"
+          (click)="toggleView()">
+          <mat-icon>calendar_month</mat-icon>
+          Month
+        </button>
+        <button
+          class="view-btn"
+          [class.active]="viewMode === 'week'"
+          (click)="toggleView()">
+          <mat-icon>view_week</mat-icon>
+          Week
+        </button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <app-button variant="outline" icon="today" (clicked)="goToToday()">
+        Today
+      </app-button>
+      <div class="month-nav">
+        <button class="nav-btn" (click)="viewMode === 'month' ? previousMonth() : previousWeek()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="nav-btn" (click)="viewMode === 'month' ? nextMonth() : nextWeek()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month View -->
+  <app-card class="calendar-card" *ngIf="viewMode === 'month'">
+    <div class="calendar-grid">
+      <!-- Week days header -->
+      <div class="weekdays">
+        <div *ngFor="let day of weekDayNames" class="weekday">
+          {{ day }}
+        </div>
+      </div>
+
+      <!-- Calendar days -->
+      <div class="calendar-days">
+        <div
+          *ngFor="let day of calendarDays"
+          class="calendar-day"
+          [class.other-month]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.has-bookings]="day.bookingCount > 0"
+          (click)="selectDay(day)">
+          <div class="day-header">
+            <div class="day-number">{{ getDayNumber(day) }}</div>
+            <div class="booking-badge" *ngIf="day.bookingCount > 0" 
+                 [class.badge-low]="day.bookingCount <= 2"
+                 [class.badge-medium]="day.bookingCount > 2 && day.bookingCount <= 4"
+                 [class.badge-high]="day.bookingCount > 4">
+              <mat-icon>event</mat-icon>
+              <span>{{ day.bookingCount }}</span>
+            </div>
+          </div>
+          <div class="day-bookings">
+            <div *ngFor="let booking of day.bookings.slice(0, 3)" 
+                 class="booking-dot"
+                 [style.background]="getStatusColor(booking.status)"
+                 [matTooltip]="booking.roomName + ' - ' + booking.purpose">
+            </div>
+            <div *ngIf="day.bookingCount > 3" class="more-bookings">
+              +{{ day.bookingCount - 3 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Week View -->
+  <app-card class="week-card" *ngIf="viewMode === 'week'">
+    <div class="week-view">
+      <div class="week-header">
+        <div *ngFor="let day of weekDays" class="week-day-header" [class.today]="day.isToday">
+          <div class="day-name">{{ day.dayName }}</div>
+          <div class="day-number-container">
+            <div class="day-number" [class.today-circle]="day.isToday">{{ day.dayNumber }}</div>
+            <div class="day-booking-count" *ngIf="day.bookings.length > 0">
+              <mat-icon>event_note</mat-icon>
+              <span>{{ day.bookings.length }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="week-content">
+        <div *ngFor="let day of weekDays" class="week-day-column" [class.today]="day.isToday">
+          <div class="day-bookings-list">
+            <div *ngIf="day.bookings.length === 0" class="no-bookings">
+              No bookings
+            </div>
+            <div *ngFor="let booking of day.bookings" class="week-booking-item">
+              <div class="booking-time">{{ formatTime(booking.startTime) }} - {{ formatTime(booking.endTime) }}</div>
+              <div class="booking-info">
+                <div class="booking-room">{{ booking.roomName }}</div>
+                <div class="booking-purpose">{{ booking.purpose }}</div>
+              </div>
+              <app-badge [variant]="booking.status === 'Booked' ? 'success' : booking.status === 'Pending' ? 'pending' : 'error'">
+                {{ booking.status }}
+              </app-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Day Details Sidebar -->
+  <div class="day-details-sidebar" *ngIf="selectedDay" [class.open]="selectedDay">
+    <div class="sidebar-header">
+      <h3>{{ selectedDay.date | date: 'EEEE, MMMM d' }}</h3>
+      <button class="close-btn" (click)="closeDetails()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="sidebar-content">
+      <div class="bookings-count">
+        {{ selectedDay.bookingCount }} booking(s)
+      </div>
+      <div *ngIf="selectedDay.bookings.length === 0" class="no-bookings-message">
+        <mat-icon>event_available</mat-icon>
+        <p>No bookings for this day</p>
+      </div>
+      <div *ngFor="let booking of selectedDay.bookings" class="detail-booking-item">
+        <div class="booking-header">
+          <app-badge [variant]="booking.status === 'Booked' ? 'success' : booking.status === 'Pending' ? 'pending' : 'error'">
+            {{ booking.status }}
+          </app-badge>
+          <span class="booking-time">{{ formatTime(booking.startTime) }} - {{ formatTime(booking.endTime) }}</span>
+        </div>
+        <div class="booking-details">
+          <div class="detail-row">
+            <mat-icon>meeting_room</mat-icon>
+            <span>{{ booking.roomName }}</span>
+          </div>
+          <div class="detail-row">
+            <mat-icon>person</mat-icon>
+            <span>{{ booking.employeeName }}</span>
+          </div>
+          <div class="detail-row">
+            <mat-icon>description</mat-icon>
+            <span>{{ booking.purpose }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

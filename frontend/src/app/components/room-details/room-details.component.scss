@@ -1,0 +1,413 @@
+.room-details-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Hero Banner
+.room-hero {
+  position: relative;
+  height: 400px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--spacing-xl);
+
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero-content {
+    padding: var(--spacing-3xl);
+    color: white;
+    width: 100%;
+    position: relative;
+  }
+
+  .back-button {
+    position: absolute;
+    top: var(--spacing-xl);
+    left: var(--spacing-xl);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: white;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-4px);
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  h1 {
+    font-size: var(--font-size-4xl);
+    margin: 0 0 var(--spacing-md) 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-base);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Content Grid
+.room-content {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--spacing-xl);
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.right-column {
+  .sticky-sidebar {
+    position: sticky;
+    top: calc(64px + var(--spacing-xl));
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+}
+
+.section-card {
+  .room-description {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+// Amenities
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.amenity-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  .amenity-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary);
+    }
+  }
+
+  span {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+}
+
+// Bookings List
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.booking-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .booking-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-primary-light);
+    border-radius: var(--radius-md);
+    min-width: 60px;
+
+    .date-day {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      line-height: 1;
+    }
+
+    .date-month {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-primary);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+  }
+
+  .booking-details {
+    flex: 1;
+    min-width: 0;
+
+    .booking-time {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+
+    .booking-purpose {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .booking-employee {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+  }
+}
+
+.empty-bookings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  color: var(--color-text-tertiary);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+  }
+}
+
+// Booking Card
+.booking-card {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-surface) 100%);
+  border: 2px solid var(--color-primary);
+
+  .booking-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+
+    .booking-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+      color: var(--color-primary);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: var(--font-size-xl);
+      color: var(--color-text-primary);
+    }
+  }
+
+  .booking-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary);
+    }
+  }
+
+  .booking-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
+
+// Stats Card
+.stats-card {
+  .stat-item {
+    text-align: center;
+    padding: var(--spacing-lg) 0;
+
+    .stat-value {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .stat-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: var(--spacing-md) 0;
+  }
+}
+
+// Loading State
+.loading-container {
+  .skeleton-hero {
+    height: 400px;
+    background: linear-gradient(90deg, var(--color-background) 0%, var(--color-border) 50%, var(--color-background) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .skeleton-content {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: var(--spacing-xl);
+  }
+
+  .skeleton-card {
+    height: 300px;
+    background: linear-gradient(90deg, var(--color-surface) 0%, var(--color-border) 50%, var(--color-surface) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .right-column .sticky-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .room-hero {
+    height: 300px;
+
+    .hero-content {
+      padding: var(--spacing-xl);
+    }
+
+    h1 {
+      font-size: var(--font-size-2xl);
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      top: var(--spacing-md);
+      left: var(--spacing-md);
+    }
+  }
+
+  .amenities-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}

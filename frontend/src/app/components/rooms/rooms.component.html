@@ -1,0 +1,205 @@
+<div class="rooms-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Conference Rooms</h1>
+      <p class="subtitle">Browse and book available meeting spaces</p>
+    </div>
+    <div class="header-actions">
+      <app-button variant="outline" icon="filter_list">
+        Filters
+      </app-button>
+      <app-button variant="primary" icon="add">
+        New Room
+      </app-button>
+    </div>
+  </div>
+
+  <div class="rooms-layout">
+    <!-- Filters Panel -->
+    <aside class="filters-panel">
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>search</mat-icon>
+          Search
+        </h3>
+        <input
+          type="text"
+          class="input"
+          placeholder="Search by name or location..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilters()">
+      </div>
+
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>event</mat-icon>
+          Date
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <input
+            matInput
+            [matDatepicker]="picker"
+            placeholder="Select date"
+            [(ngModel)]="selectedDate"
+            (ngModelChange)="applyFilters()">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>people</mat-icon>
+          Capacity
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-select
+            [(ngModel)]="minCapacity"
+            (ngModelChange)="applyFilters()"
+            placeholder="Minimum capacity">
+            <mat-option *ngFor="let option of capacityOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>toggle_on</mat-icon>
+          Status
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-select
+            [(ngModel)]="selectedStatus"
+            (ngModelChange)="applyFilters()"
+            placeholder="Filter by status">
+            <mat-option value="all">All Rooms</mat-option>
+            <mat-option value="Available">Available</mat-option>
+            <mat-option value="Occupied">Occupied</mat-option>
+            <mat-option value="Reserved">Reserved</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="filter-title">
+          <mat-icon>devices</mat-icon>
+          Amenities
+        </h3>
+        <div class="amenities-filter">
+          <button
+            *ngFor="let amenity of availableAmenities"
+            class="amenity-chip"
+            [class.selected]="selectedAmenities.includes(amenity)"
+            (click)="toggleAmenity(amenity)">
+            <mat-icon>{{ getAmenityIcon(amenity) }}</mat-icon>
+            <span>{{ amenity }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <app-button variant="outline" size="sm" [fullWidth]="true" (clicked)="clearFilters()">
+          Clear Filters
+        </app-button>
+      </div>
+    </aside>
+
+    <!-- Rooms Grid -->
+    <main class="rooms-content">
+      <div class="results-header">
+        <p class="results-count">
+          <span class="count">{{ filteredRooms.length }}</span> rooms found
+        </p>
+        <div class="view-options">
+          <button class="view-btn active" title="Grid view">
+            <mat-icon>grid_view</mat-icon>
+          </button>
+          <button class="view-btn" title="List view">
+            <mat-icon>view_list</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="rooms-grid" *ngIf="loading">
+        <div class="skeleton-card" *ngFor="let item of [1,2,3,4,5,6]"></div>
+      </div>
+
+      <!-- Rooms Grid -->
+      <div class="rooms-grid" *ngIf="!loading && filteredRooms.length > 0">
+        <app-card
+          *ngFor="let room of filteredRooms"
+          [hoverable]="true"
+          class="room-card">
+          
+          <div class="room-image">
+            <img
+              [src]="room.imageUrl || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=500'"
+              [alt]="room.name">
+            <div class="room-status-overlay">
+              <app-badge [variant]="getStatusVariant(room.status)">
+                {{ room.status }}
+              </app-badge>
+            </div>
+          </div>
+
+          <div class="room-content">
+            <div class="room-header">
+              <h3 class="room-name">{{ room.name }}</h3>
+              <div class="room-capacity">
+                <mat-icon>people</mat-icon>
+                <span>{{ room.capacity }}</span>
+              </div>
+            </div>
+
+            <div class="room-location">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ room.location }}</span>
+            </div>
+
+            <p class="room-description">{{ room.description }}</p>
+
+            <div class="room-amenities">
+              <div
+                *ngFor="let amenity of room.amenities"
+                class="amenity-tag"
+                [title]="amenity">
+                <mat-icon>{{ getAmenityIcon(amenity) }}</mat-icon>
+              </div>
+            </div>
+          </div>
+
+          <div footer class="room-footer">
+            <app-button
+              variant="outline"
+              size="sm"
+              icon="info"
+              [routerLink]="['/dashboard/rooms', room.id]">
+              Details
+            </app-button>
+            <app-button
+              variant="primary"
+              size="sm"
+              icon="event"
+              [disabled]="room.status !== 'Available'">
+              Book Now
+            </app-button>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && filteredRooms.length === 0">
+        <mat-icon>search_off</mat-icon>
+        <h3>No rooms found</h3>
+        <p>Try adjusting your filters to see more results</p>
+        <app-button variant="outline" (clicked)="clearFilters()">
+          Clear Filters
+        </app-button>
+      </div>
+    </main>
+  </div>
+</div>

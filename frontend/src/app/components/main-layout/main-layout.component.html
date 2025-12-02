@@ -1,0 +1,73 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+    
+    <div class="sidenav-header">
+      <div class="logo">
+        <mat-icon class="logo-icon">meeting_room</mat-icon>
+        <span class="logo-text">RoomHub</span>
+      </div>
+    </div>
+
+    <mat-nav-list class="nav-list">
+      <a mat-list-item 
+         *ngFor="let item of getFilteredMenuItems()" 
+         [routerLink]="item.route" 
+         routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+         class="nav-item"
+         (click)="onMenuItemClick(drawer)">
+        <mat-icon matListItemIcon class="nav-icon">{{item.icon}}</mat-icon>
+        <span matListItemTitle class="nav-label">{{item.label}}</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <a mat-list-item (click)="logout()" class="nav-item logout-item">
+        <mat-icon matListItemIcon class="nav-icon">logout</mat-icon>
+        <span matListItemTitle class="nav-label">Logout</span>
+      </a>
+    </div>
+  </mat-sidenav>
+  
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        class="menu-button"
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <div class="toolbar-search" *ngIf="!(isHandset$ | async)">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" placeholder="Search rooms, bookings..." class="search-input">
+      </div>
+      
+      <span class="spacer"></span>
+      
+      <app-notification-bell></app-notification-bell>
+      
+      <div class="user-profile" *ngIf="currentUser$ | async as user">
+        <div class="user-avatar">
+          <img *ngIf="user.profileImageUrl" [src]="getProfileImageUrl(user.profileImageUrl)" alt="Profile" class="avatar-image">
+          <span *ngIf="!user.profileImageUrl" class="avatar-initials">{{ user.fullName.charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="user-details" *ngIf="!(isHandset$ | async)">
+          <div class="user-name">{{user.fullName}}</div>
+          <div class="user-role">{{user.role}}</div>
+        </div>
+      </div>
+    </mat-toolbar>
+    
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

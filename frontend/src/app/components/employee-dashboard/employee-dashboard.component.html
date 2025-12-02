@@ -1,0 +1,139 @@
+<div class="employee-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Welcome back, {{ user?.fullName || 'Employee' }}!</h1>
+    <p>Here's your overview for today</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <app-kpi-card
+      [value]="kpiData.myBookings"
+      label="My Bookings"
+      icon="event"
+      [loading]="loading"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="kpiData.upcomingMeetings"
+      label="Upcoming"
+      icon="schedule"
+      [loading]="loading"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="kpiData.pendingRequests"
+      label="Pending"
+      icon="pending"
+      [loading]="loading"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="kpiData.completedToday"
+      label="Completed Today"
+      icon="check_circle"
+      [loading]="loading"
+    ></app-kpi-card>
+  </div>
+
+  <!-- Quick Actions -->
+  <app-card>
+    <div class="card-header">
+      <h2>Quick Actions</h2>
+    </div>
+    <div class="quick-actions">
+      <app-button
+        variant="primary"
+        icon="add"
+        routerLink="/booking-form"
+      >
+        Book a Room
+      </app-button>
+      <app-button
+        variant="outline"
+        icon="list"
+        routerLink="/my-requests"
+      >
+        My Requests
+      </app-button>
+      <app-button
+        variant="outline"
+        icon="calendar_today"
+        routerLink="/calendar"
+      >
+        View Calendar
+      </app-button>
+      <app-button
+        variant="outline"
+        icon="room"
+        routerLink="/rooms"
+      >
+        Browse Rooms
+      </app-button>
+    </div>
+  </app-card>
+
+  <!-- Upcoming Meetings -->
+  <app-card *ngIf="upcomingMeetings.length > 0">
+    <div class="card-header">
+      <h2>Upcoming Meetings</h2>
+      <app-button
+        variant="outline"
+        icon="arrow_forward"
+        routerLink="/my-requests"
+      >
+        View All
+      </app-button>
+    </div>
+    <div class="meetings-list">
+      <div class="meeting-item" *ngFor="let meeting of upcomingMeetings">
+        <div class="meeting-icon">
+          <mat-icon>meeting_room</mat-icon>
+        </div>
+        <div class="meeting-details">
+          <div class="meeting-room">{{ meeting.roomName }}</div>
+          <div class="meeting-purpose">{{ meeting.purpose }}</div>
+          <div class="meeting-time">
+            {{ formatDate(meeting.date) }} • {{ formatTime(meeting.startTime) }} - {{ formatTime(meeting.endTime) }}
+          </div>
+        </div>
+        <app-badge [variant]="getStatusClass(meeting.status)">
+          {{ meeting.status }}
+        </app-badge>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Empty state for no upcoming meetings -->
+  <app-card *ngIf="upcomingMeetings.length === 0 && !loading">
+    <div class="empty-state">
+      <mat-icon>event_available</mat-icon>
+      <h3>No Upcoming Meetings</h3>
+      <p>You don't have any scheduled meetings. Book a room to get started!</p>
+      <app-button variant="primary" routerLink="/booking-form">
+        Book a Room
+      </app-button>
+    </div>
+  </app-card>
+
+  <!-- Recent Activity -->
+  <app-card *ngIf="recentActivity.length > 0">
+    <div class="card-header">
+      <h2>Recent Activity</h2>
+    </div>
+    <div class="activity-list">
+      <div class="activity-item" *ngFor="let activity of recentActivity">
+        <div class="activity-icon">
+          <mat-icon>{{ activity.status === 'Booked' ? 'check_circle' : activity.status === 'Pending' ? 'schedule' : 'cancel' }}</mat-icon>
+        </div>
+        <div class="activity-details">
+          <div class="activity-action">{{ activity.action }}</div>
+          <div class="activity-room">{{ activity.roomName }} • {{ formatDate(activity.date) }}</div>
+        </div>
+        <app-badge [variant]="getStatusClass(activity.status)">
+          {{ activity.status }}
+        </app-badge>
+      </div>
+    </div>
+  </app-card>
+</div>

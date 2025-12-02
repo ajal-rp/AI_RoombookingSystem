@@ -1,0 +1,50 @@
+# Environment-specific settings
+appsettings.Development.json
+appsettings.Production.json
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rtifacts/
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+.vs/
+
+# Database
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Angular
+/client/dist/
+/client/.angular/
+/client/.vscode/
+
+# IDEs
+.idea/
+*.swp
+*.bak
+*~
+.DS_Store
+.vscode/
+backend/src/ConferenceRoomBooking.API/logs/**
+backend/src/ConferenceRoomBooking.API/wwwroot/**
+backend/src/ConferenceRoomBooking.Infrastructure/Persistence/Migrations/**
+frontend/.angular/**
+frontend/dist/**
+frontend/src/environments/environment.prod.ts

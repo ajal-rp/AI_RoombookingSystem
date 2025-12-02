@@ -1,0 +1,531 @@
+.booking-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+// Header
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+
+  .back-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    mat-icon {
+      color: #6b7280;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover {
+      background: #f9fafb;
+      border-color: var(--color-primary);
+      transform: translateX(-2px);
+
+      mat-icon {
+        color: var(--color-primary);
+      }
+    }
+
+    &:active {
+      transform: translateX(-2px) scale(0.98);
+    }
+  }
+
+  .header-content {
+    flex: 1;
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 32px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 var(--spacing-xs) 0;
+      letter-spacing: -0.02em;
+
+      mat-icon {
+        color: var(--color-primary);
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+// Form Layout
+.form-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 420px !important;
+  gap: var(--spacing-xl);
+  align-items: start;
+  width: 100%;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summary-column {
+  position: sticky;
+  top: var(--spacing-lg);
+  min-width: 0;
+}
+
+// Card Headers
+.card-header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: var(--spacing-lg);
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+}
+
+// Form Groups
+.form-group {
+  margin-bottom: var(--spacing-lg);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--color-primary);
+  }
+}
+
+// Input Wrapper
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-icon {
+    position: absolute;
+    right: 12px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .date-toggle {
+    position: absolute;
+    right: 8px;
+    opacity: 0;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Modern Input Styles
+.form-control {
+  width: 100%;
+  font-size: 15px;
+  color: var(--color-text);
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    background: var(--color-surface);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.modern-input {
+  padding: 14px 44px 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: text;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    border-color: var(--color-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  &.ng-invalid.ng-touched {
+    border-color: #dc2626;
+    background: #fef2f2;
+
+    &:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+  }
+}
+
+.modern-select {
+  padding: 14px 44px 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  appearance: none;
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    border-color: var(--color-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  &.ng-invalid.ng-touched {
+    border-color: #dc2626;
+    background: #fef2f2;
+
+    &:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+  }
+
+  option {
+    padding: 12px;
+  }
+}
+
+.modern-textarea {
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+  min-height: 100px;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:hover {
+    border-color: #d1d5db;
+  }
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  &.ng-invalid.ng-touched {
+    border-color: #dc2626;
+    background: #fef2f2;
+
+    &:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+  }
+}
+
+// Hide default date picker icon
+input[matInput] {
+  cursor: pointer;
+}
+
+// Material Date Picker Override
+::ng-deep {
+  .mat-datepicker-toggle {
+    button {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  .mat-mdc-form-field {
+    display: none;
+  }
+}
+
+// Form Hints & Errors
+.form-hint {
+  margin-top: var(--spacing-xs);
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-error {
+  margin-top: var(--spacing-xs);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-weight: 500;
+  animation: slideIn 0.2s ease-out;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-hint {
+  margin-top: var(--spacing-xs);
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// Summary Card
+.summary-card {
+  ::ng-deep .card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%) !important;
+    border: 1px solid #2d2d44 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  ::ng-deep .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: transparent !important;
+  }
+
+  ::ng-deep .card-title,
+  ::ng-deep h2,
+  ::ng-deep h3 {
+    color: white !important;
+    font-weight: 700 !important;
+  }
+
+  ::ng-deep .card-body {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+}
+
+.summary-content {
+  padding: var(--spacing-md) 0;
+}
+
+.summary-section {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-size: 15px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-weight: 500;
+  word-break: break-word;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    flex-shrink: 0;
+  }
+
+  &.highlight {
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+  }
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: var(--spacing-md) var(--spacing-lg);
+}
+
+// Amenities
+.amenities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.amenity-chip {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+// No Selection State
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl) var(--spacing-lg);
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: var(--spacing-md);
+  }
+
+  p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+// Action Buttons
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  margin-top: var(--spacing-lg);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-column {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-form-container {
+    padding: var(--spacing-md);
+  }
+
+  .page-header {
+    .header-content h1 {
+      font-size: 24px;
+    }
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+}

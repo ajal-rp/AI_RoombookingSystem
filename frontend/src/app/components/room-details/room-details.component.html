@@ -1,0 +1,144 @@
+<div class="room-details-container" *ngIf="!loading && room">
+  <!-- Hero Banner -->
+  <div class="room-hero">
+    <img [src]="room.imageUrl" [alt]="room.name" class="hero-image">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <button class="back-button" routerLink="/dashboard/rooms">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="hero-text">
+          <h1>{{ room.name }}</h1>
+          <div class="hero-meta">
+            <span class="meta-item">
+              <mat-icon>location_on</mat-icon>
+              {{ room.location }}
+            </span>
+            <span class="meta-item">
+              <mat-icon>people</mat-icon>
+              Up to {{ room.capacity }} people
+            </span>
+            <app-badge [variant]="getStatusVariant(room.status)">
+              {{ room.status }}
+            </app-badge>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="room-content">
+    <div class="content-grid">
+      <!-- Left Column - Info -->
+      <div class="left-column">
+        <!-- Description Card -->
+        <app-card title="About this room" class="section-card">
+          <p class="room-description">{{ room.description }}</p>
+        </app-card>
+
+        <!-- Amenities Card -->
+        <app-card title="Amenities" class="section-card">
+          <div class="amenities-grid">
+            <div *ngFor="let amenity of room.amenities" class="amenity-item">
+              <div class="amenity-icon-wrapper">
+                <mat-icon>{{ getAmenityIcon(amenity) }}</mat-icon>
+              </div>
+              <span>{{ amenity }}</span>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Upcoming Bookings Card -->
+        <app-card title="Upcoming Bookings" class="section-card">
+          <div class="bookings-list" *ngIf="upcomingBookings.length > 0">
+            <div class="booking-item" *ngFor="let booking of upcomingBookings">
+              <div class="booking-date">
+                <div class="date-day">{{ formatDate(booking.date).split(' ')[2] }}</div>
+                <div class="date-month">{{ formatDate(booking.date).split(' ')[1] }}</div>
+              </div>
+              <div class="booking-details">
+                <div class="booking-time">{{ booking.startTime }} - {{ booking.endTime }}</div>
+                <div class="booking-purpose">{{ booking.purpose }}</div>
+                <div class="booking-employee">by {{ booking.employeeName }}</div>
+              </div>
+              <app-badge variant="success" size="sm">
+                {{ booking.status }}
+              </app-badge>
+            </div>
+          </div>
+          <div class="empty-bookings" *ngIf="upcomingBookings.length === 0">
+            <mat-icon>event_available</mat-icon>
+            <p>No upcoming bookings</p>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Column - Actions -->
+      <div class="right-column">
+        <div class="sticky-sidebar">
+          <!-- Booking Card -->
+          <app-card class="booking-card">
+            <div class="booking-card-header">
+              <mat-icon class="booking-icon">event</mat-icon>
+              <h3>Book this room</h3>
+            </div>
+            <div class="booking-card-body">
+              <div class="info-row">
+                <mat-icon>people</mat-icon>
+                <span>Capacity: {{ room.capacity }} people</span>
+              </div>
+              <div class="info-row">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ room.location }}</span>
+              </div>
+              <div class="info-row">
+                <mat-icon>schedule</mat-icon>
+                <span>Available for booking</span>
+              </div>
+            </div>
+            <div class="booking-card-actions">
+              <app-button 
+                variant="primary" 
+                icon="add" 
+                [fullWidth]="true"
+                size="lg"
+                [routerLink]="['/dashboard/book-room']"
+                [queryParams]="{roomId: room.id}">
+                Request Booking
+              </app-button>
+              <app-button 
+                variant="outline" 
+                icon="calendar_month" 
+                [fullWidth]="true">
+                View Calendar
+              </app-button>
+            </div>
+          </app-card>
+
+          <!-- Quick Stats Card -->
+          <app-card title="Quick Stats" class="stats-card">
+            <div class="stat-item">
+              <div class="stat-value">{{ upcomingBookings.length }}</div>
+              <div class="stat-label">Upcoming Bookings</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">{{ room.amenities.length }}</div>
+              <div class="stat-label">Amenities Available</div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="skeleton-hero"></div>
+  <div class="skeleton-content">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+</div>
