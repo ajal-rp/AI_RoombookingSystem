@@ -1,4 +1,5 @@
 using ConferenceRoomBooking.Application.DTOs;
+using ConferenceRoomBooking.Application.Features.Rooms.Commands;
 using ConferenceRoomBooking.Application.Features.Rooms.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -95,5 +96,29 @@ public class RoomsController : ControllerBase
     {
         var schedules = await _mediator.Send(new GetRoomSchedulesQuery());
         return Ok(schedules);
+    }
+
+    /// <summary>
+    /// Create a new room (Admin only)
+    /// </summary>
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<RoomDto>> CreateRoom([FromBody] CreateRoomCommand command)
+    {
+        try
+        {
+            var room = await _mediator.Send(command);
+            
+            // Invalidate cache
+            _cache.Remove("rooms___");
+            
+            _logger.LogInformation("Room created successfully: {RoomName}", room.Name);
+            
+            return CreatedAtAction(nameof(GetRoomById), new { id = room.Id }, room);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
