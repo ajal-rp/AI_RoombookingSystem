@@ -58,6 +58,13 @@ export class RoomService {
     );
   }
 
+  createRoom(room: Omit<Room, 'id'>): Observable<Room> {
+    return this.http.post<Room>(this.apiUrl, room).pipe(
+      tap(() => this.clearCache()),
+      catchError(this.handleError)
+    );
+  }
+
   clearCache(): void {
     this.roomsCache$ = undefined;
   }

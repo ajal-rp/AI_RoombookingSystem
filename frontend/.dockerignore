@@ -1,0 +1,12 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/node_modules
+**/npm-debug.log
+**/dist
+**/.angular
+**/coverage
+**/.DS_Store
+**/Thumbs.db
+**/*.md
+!README.md

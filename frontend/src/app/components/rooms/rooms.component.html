@@ -9,7 +9,7 @@
       <app-button variant="outline" icon="filter_list">
         Filters
       </app-button>
-      <app-button variant="primary" icon="add">
+      <app-button *ngIf="isAdmin" variant="primary" icon="add" (click)="addNewRoom()">
         New Room
       </app-button>
     </div>
@@ -114,10 +114,18 @@
           <span class="count">{{ filteredRooms.length }}</span> rooms found
         </p>
         <div class="view-options">
-          <button class="view-btn active" title="Grid view">
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'grid'"
+            (click)="setViewMode('grid')"
+            title="Grid view">
             <mat-icon>grid_view</mat-icon>
           </button>
-          <button class="view-btn" title="List view">
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'list'"
+            (click)="setViewMode('list')"
+            title="List view">
             <mat-icon>view_list</mat-icon>
           </button>
         </div>
@@ -129,7 +137,7 @@
       </div>
 
       <!-- Rooms Grid -->
-      <div class="rooms-grid" *ngIf="!loading && filteredRooms.length > 0">
+      <div class="rooms-grid" [class.list-view]="viewMode === 'list'" *ngIf="!loading && filteredRooms.length > 0">
         <app-card
           *ngFor="let room of filteredRooms"
           [hoverable]="true"

@@ -7,11 +7,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { RoomService } from '../../services/room.service';
+import { AuthService } from '../../services/auth.service';
 
 interface Room {
   id: number;
@@ -58,6 +59,7 @@ export class RoomsComponent implements OnInit {
   loading = true;
   rooms: Room[] = [];
   filteredRooms: Room[] = [];
+  viewMode: 'grid' | 'list' = 'grid';
 
   // Filters
   searchQuery = '';
@@ -82,10 +84,22 @@ export class RoomsComponent implements OnInit {
     { label: '20+ people', value: 21 }
   ];
 
-  constructor(private roomService: RoomService) {}
+  constructor(
+    private readonly roomService: RoomService,
+    private readonly authService: AuthService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadRooms();
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.isAdmin;
+  }
+
+  addNewRoom(): void {
+    this.router.navigate(['/dashboard/rooms/add']);
   }
 
   loadRooms(): void {
@@ -194,5 +208,9 @@ export class RoomsComponent implements OnInit {
       'TV': 'tv'
     };
     return icons[amenity] || 'check_circle';
+  }
+
+  setViewMode(mode: 'grid' | 'list'): void {
+    this.viewMode = mode;
   }
 }

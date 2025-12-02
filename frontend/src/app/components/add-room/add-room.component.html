@@ -1,0 +1,136 @@
+<div class="add-room-container">
+  <mat-card class="room-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>meeting_room</mat-icon>
+        Add New Room
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- Room Name -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Room Name</mat-label>
+            <input 
+              matInput 
+              formControlName="name" 
+              placeholder="e.g., Conference Room A"
+              required>
+            <mat-icon matPrefix>label</mat-icon>
+            <mat-error *ngIf="roomForm.get('name')?.hasError('required')">
+              Room name is required
+            </mat-error>
+            <mat-error *ngIf="roomForm.get('name')?.hasError('maxlength')">
+              Maximum 100 characters allowed
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Location -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Location</mat-label>
+            <input 
+              matInput 
+              formControlName="location" 
+              placeholder="e.g., Building A, 3rd Floor"
+              required>
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-error *ngIf="roomForm.get('location')?.hasError('required')">
+              Location is required
+            </mat-error>
+            <mat-error *ngIf="roomForm.get('location')?.hasError('maxlength')">
+              Maximum 200 characters allowed
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Capacity -->
+          <mat-form-field appearance="outline">
+            <mat-label>Capacity</mat-label>
+            <input 
+              matInput 
+              type="number" 
+              formControlName="capacity" 
+              placeholder="Number of people"
+              required>
+            <mat-icon matPrefix>people</mat-icon>
+            <mat-error *ngIf="roomForm.get('capacity')?.hasError('required')">
+              Capacity is required
+            </mat-error>
+            <mat-error *ngIf="roomForm.get('capacity')?.hasError('min')">
+              Minimum capacity is 1
+            </mat-error>
+            <mat-error *ngIf="roomForm.get('capacity')?.hasError('max')">
+              Maximum capacity is 1000
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Description -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea 
+              matInput 
+              formControlName="description" 
+              rows="3"
+              placeholder="Room description (optional)"></textarea>
+            <mat-icon matPrefix>description</mat-icon>
+            <mat-error *ngIf="roomForm.get('description')?.hasError('maxlength')">
+              Maximum 500 characters allowed
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Amenities -->
+          <div class="full-width amenities-section">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Add Amenities</mat-label>
+              <input 
+                matInput 
+                formControlName="amenityInput" 
+                placeholder="e.g., Projector, Whiteboard"
+                (keyup.enter)="addAmenity()">
+              <mat-icon matPrefix>devices</mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="addAmenity()"
+                [disabled]="!roomForm.get('amenityInput')?.value">
+                <mat-icon>add</mat-icon>
+              </button>
+            </mat-form-field>
+
+            <mat-chip-set *ngIf="amenities.length > 0" class="amenity-chips">
+              <mat-chip 
+                *ngFor="let amenity of amenities"
+                (removed)="removeAmenity(amenity)">
+                {{amenity}}
+                <button matChipRemove>
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            type="button"
+            (click)="cancel()"
+            [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="roomForm.invalid || isSubmitting">
+            <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+            <span *ngIf="!isSubmitting">Create Room</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -42,6 +42,11 @@ export const routes: Routes = [
         component: RoomsComponent
       },
       {
+        path: 'rooms/add',
+        loadComponent: () => import('./components/add-room/add-room.component').then(m => m.AddRoomComponent),
+        canActivate: [adminGuard]
+      },
+      {
         path: 'rooms/:id',
         component: RoomDetailsComponent
       },
