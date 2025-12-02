@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # SQL Server Database (Development)
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: conference-booking-db-dev
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=DevPassword123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata-dev:/var/opt/mssql
+    networks:
+      - conference-booking-dev
+
+  # Backend API (Development with hot reload)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: build
+    container_name: conference-booking-api-dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=database;Database=ConferenceRoomBookingDb;User Id=sa;Password=DevPassword123!;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - JwtSettings__SecretKey=development-secret-key-min-32-chars
+      - JwtSettings__Issuer=ConferenceRoomBookingAPI
+      - JwtSettings__Audience=ConferenceRoomBookingClient
+      - JwtSettings__ExpiryInMinutes=60
+    ports:
+      - "7001:80"
+    depends_on:
+      - database
+    networks:
+      - conference-booking-dev
+    volumes:
+      - ./backend/src:/src/src
+      - ./backend/src/ConferenceRoomBooking.API/logs:/app/logs
+    command: dotnet watch run --project /src/src/ConferenceRoomBooking.API/ConferenceRoomBooking.API.csproj --no-launch-profile
+    restart: unless-stopped
+
+  # Frontend Application (Development)
+  frontend:
+    image: node:20-alpine
+    container_name: conference-booking-frontend-dev
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - conference-booking-dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm start -- --host 0.0.0.0 --poll 2000"
+    restart: unless-stopped
+
+networks:
+  conference-booking-dev:
+    driver: bridge
+
+volumes:
+  sqldata-dev:
+    driver: local

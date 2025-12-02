@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: conference-booking-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - conference-booking-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: conference-booking-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=database;Database=ConferenceRoomBookingDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - JwtSettings__SecretKey=your-super-secret-key-min-32-characters-long-for-production
+      - JwtSettings__Issuer=ConferenceRoomBookingAPI
+      - JwtSettings__Audience=ConferenceRoomBookingClient
+      - JwtSettings__ExpiryInMinutes=60
+    ports:
+      - "5000:80"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - conference-booking-network
+    volumes:
+      - ./backend/src/ConferenceRoomBooking.API/logs:/app/logs
+    restart: unless-stopped
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: conference-booking-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - conference-booking-network
+    restart: unless-stopped
+
+networks:
+  conference-booking-network:
+    driver: bridge
+
+volumes:
+  sqldata:
+    driver: local

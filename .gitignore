@@ -48,3 +48,4 @@ backend/src/ConferenceRoomBooking.Infrastructure/Persistence/Migrations/**
 frontend/.angular/**
 frontend/dist/**
 frontend/src/environments/environment.prod.ts
+.env.example
