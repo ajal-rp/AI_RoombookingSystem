@@ -10,11 +10,22 @@ import {
 } from "../models/booking.model";
 import { environment } from "../../environments/environment";
 
+interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 @Injectable({
   providedIn: "root",
 })
 export class BookingService {
   private readonly apiUrl = `${environment.apiUrl}/bookingrequests`;
+  private pendingRequestsCache$?: Observable<BookingRequest[]>;
+  private lastPendingFetch = 0;
+  private readonly CACHE_DURATION = 60000; // 1 minute
 
   constructor(private readonly http: HttpClient) {}
 
@@ -28,10 +39,20 @@ export class BookingService {
   }
 
   getPendingRequests(): Observable<BookingRequest[]> {
-    return this.http.get<BookingRequest[]>(`${this.apiUrl}/pending`).pipe(
+    const now = Date.now();
+    // Return cached data if still fresh (within 1 minute)
+    if (this.pendingRequestsCache$ && (now - this.lastPendingFetch) < this.CACHE_DURATION) {
+      return this.pendingRequestsCache$;
+    }
+
+    this.lastPendingFetch = now;
+    this.pendingRequestsCache$ = this.http.get<BookingRequest[]>(`${this.apiUrl}/pending`).pipe(
       retry(2),
-      catchError(this.handleError)
+      catchError(this.handleError),
+      tap(() => this.lastPendingFetch = Date.now())
     );
+
+    return this.pendingRequestsCache$;
   }
 
   getBookingRequests(
@@ -40,7 +61,7 @@ export class BookingService {
     endDate?: Date,
     page: number = 1,
     pageSize: number = 50
-  ): Observable<any> {
+  ): Observable<PaginatedResponse<BookingRequest>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());

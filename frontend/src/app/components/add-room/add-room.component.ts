@@ -68,9 +68,9 @@ export class AddRoomComponent {
 
   onSubmit(): void {
     if (this.roomForm.invalid) {
-      Object.keys(this.roomForm.controls).forEach(key => {
+      for (const key of Object.keys(this.roomForm.controls)) {
         this.roomForm.get(key)?.markAsTouched();
-      });
+      }
       return;
     }
 
@@ -79,7 +79,7 @@ export class AddRoomComponent {
     const roomData = {
       name: this.roomForm.value.name,
       location: this.roomForm.value.location,
-      capacity: parseInt(this.roomForm.value.capacity),
+      capacity: Number.parseInt(this.roomForm.value.capacity),
       description: this.roomForm.value.description || null,
       amenities: this.amenities
     };

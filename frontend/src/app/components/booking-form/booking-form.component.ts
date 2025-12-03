@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -34,7 +36,7 @@ import { Room } from '../../models/room.model';
   templateUrl: './booking-form.component.html',
   styleUrls: ['./booking-form.component.scss']
 })
-export class BookingFormComponent implements OnInit {
+export class BookingFormComponent implements OnInit, OnDestroy {
   bookingForm!: FormGroup;
   rooms: Room[] = [];
   selectedRoom: Room | null = null;
@@ -43,17 +45,18 @@ export class BookingFormComponent implements OnInit {
   minDate = new Date();
   isEditMode = false;
   bookingId: number | null = null;
+  private readonly destroy$ = new Subject<void>();
 
   // Time slots (9 AM to 6 PM, 30 min intervals)
   timeSlots: string[] = [];
 
   constructor(
-    private fb: FormBuilder,
-    private bookingService: BookingService,
-    private roomService: RoomService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private readonly fb: FormBuilder,
+    private readonly bookingService: BookingService,
+    private readonly roomService: RoomService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly snackBar: MatSnackBar
   ) {
     this.generateTimeSlots();
   }
@@ -89,18 +92,31 @@ export class BookingFormComponent implements OnInit {
     });
 
     // Watch for room changes
-    this.bookingForm.get('roomId')?.valueChanges.subscribe(roomId => {
-      this.selectedRoom = this.rooms.find(r => r.id === +roomId) || null;
-    });
+    this.bookingForm.get('roomId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(roomId => {
+        this.selectedRoom = this.rooms.find(r => r.id === +roomId) || null;
+      });
 
     // Add custom validators for time
-    this.bookingForm.get('startTime')?.valueChanges.subscribe(() => this.validateTimes());
-    this.bookingForm.get('endTime')?.valueChanges.subscribe(() => this.validateTimes());
+    this.bookingForm.get('startTime')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.validateTimes());
+    this.bookingForm.get('endTime')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.validateTimes());
     
     // Watch for date changes to update formatted date
-    this.bookingForm.get('date')?.valueChanges.subscribe(() => {
-      // Trigger change detection by updating a property
-    });
+    this.bookingForm.get('date')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Trigger change detection by updating a property
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   validateTimes(): void {
@@ -137,7 +153,6 @@ export class BookingFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error loading rooms:', error);
         this.snackBar.open('Failed to load rooms', 'Close', { duration: 3000 });
         this.loading = false;
       }
@@ -179,9 +194,9 @@ export class BookingFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.bookingForm.invalid) {
-      Object.keys(this.bookingForm.controls).forEach(key => {
+      for (const key of Object.keys(this.bookingForm.controls)) {
         this.bookingForm.get(key)?.markAsTouched();
-      });
+      }
       this.snackBar.open('Please fill all required fields correctly', 'Close', { duration: 3000 });
       return;
     }
@@ -215,39 +230,58 @@ export class BookingFormComponent implements OnInit {
       error: (error) => {
         console.error('Error submitting booking:', error);
         this.submitting = false;
-
-        // Handle validation errors from backend
-        if (error.status === 400 && error.error?.errors) {
-          const validationErrors = error.error.errors;
-          let errorMessage = 'Validation failed:\n';
-          
-          // Check if it's FluentValidation format
-          if (Array.isArray(validationErrors)) {
-            validationErrors.forEach((err: any) => {
-              errorMessage += `• ${err.errorMessage}\n`;
-              // Mark the corresponding form field as invalid
-              const fieldName = err.propertyName?.charAt(0).toLowerCase() + err.propertyName?.slice(1);
-              if (fieldName && this.bookingForm.get(fieldName)) {
-                this.bookingForm.get(fieldName)?.setErrors({ backend: err.errorMessage });
-              }
-            });
-          } else {
-            // Handle other validation error formats
-            Object.keys(validationErrors).forEach(key => {
-              const fieldErrors = validationErrors[key];
-              if (Array.isArray(fieldErrors)) {
-                fieldErrors.forEach(msg => errorMessage += `• ${msg}\n`);
-              }
-            });
-          }
-          
-          this.snackBar.open(errorMessage, 'Close', { duration: 8000 });
-        } else {
-          const message = error.error?.message || error.error?.title || 'Failed to submit booking request';
-          this.snackBar.open(message, 'Close', { duration: 5000 });
-        }
+        this.handleBookingError(error);
       }
     });
+  }
+
+  private handleBookingError(error: any): void {
+    // Handle validation errors from backend
+    if (error.status === 400 && error.error?.errors) {
+      this.handleValidationErrors(error.error.errors);
+    } else {
+      const message = error.error?.message || error.error?.title || 'Failed to submit booking request';
+      this.snackBar.open(message, 'Close', { duration: 5000 });
+    }
+  }
+
+  private handleValidationErrors(validationErrors: any): void {
+    const errorMessage = Array.isArray(validationErrors)
+      ? this.handleFluentValidationErrors(validationErrors)
+      : this.handleStandardValidationErrors(validationErrors);
+    
+    this.snackBar.open(errorMessage, 'Close', { duration: 8000 });
+  }
+
+  private handleFluentValidationErrors(errors: any[]): string {
+    let errorMessage = 'Validation failed:\n';
+    for (const err of errors) {
+      errorMessage += `• ${err.errorMessage}\n`;
+      this.markFieldAsInvalid(err.propertyName, err.errorMessage);
+    }
+    return errorMessage;
+  }
+
+  private handleStandardValidationErrors(validationErrors: any): string {
+    let errorMessage = 'Validation failed:\n';
+    for (const key of Object.keys(validationErrors)) {
+      const fieldErrors = validationErrors[key];
+      if (Array.isArray(fieldErrors)) {
+        for (const msg of fieldErrors) {
+          errorMessage += `• ${msg}\n`;
+        }
+      }
+    }
+    return errorMessage;
+  }
+
+  private markFieldAsInvalid(propertyName: string | undefined, errorMessage: string): void {
+    if (!propertyName) return;
+    const fieldName = propertyName.charAt(0).toLowerCase() + propertyName.slice(1);
+    const field = this.bookingForm.get(fieldName);
+    if (field) {
+      field.setErrors({ backend: errorMessage });
+    }
   }
 
   cancel(): void {

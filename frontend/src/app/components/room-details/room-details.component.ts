@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -45,23 +47,31 @@ interface Booking {
   templateUrl: './room-details.component.html',
   styleUrls: ['./room-details.component.scss']
 })
-export class RoomDetailsComponent implements OnInit {
+export class RoomDetailsComponent implements OnInit, OnDestroy {
   roomId!: number;
   room: RoomDetails | null = null;
   upcomingBookings: Booking[] = [];
   loading = true;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private route: ActivatedRoute,
-    private roomService: RoomService,
-    private bookingService: BookingService
+    private readonly route: ActivatedRoute,
+    private readonly roomService: RoomService,
+    private readonly bookingService: BookingService
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe((params: any) => {
-      this.roomId = +params['id'];
-      this.loadRoomDetails();
-    });
+    this.route.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.roomId = +params['id'];
+        this.loadRoomDetails();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadRoomDetails(): void {

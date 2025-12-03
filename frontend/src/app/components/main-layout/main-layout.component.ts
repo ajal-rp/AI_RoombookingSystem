@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -7,8 +7,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { environment } from '../../../environments/environment';
@@ -29,7 +29,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
@@ -38,6 +38,7 @@ export class MainLayoutComponent implements OnInit {
 
   currentUser$ = this.authService.currentUser;
   isHandsetMode = false;
+  private readonly destroy$ = new Subject<void>();
   
   menuItems = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard', adminOnly: true },
@@ -52,15 +53,22 @@ export class MainLayoutComponent implements OnInit {
 
 
   constructor(
-    private breakpointObserver: BreakpointObserver,
-    private authService: AuthService,
-    private router: Router
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    this.isHandset$.subscribe(isHandset => {
-      this.isHandsetMode = isHandset;
-    });
+    this.isHandset$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isHandset => {
+        this.isHandsetMode = isHandset;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   isAdmin(): boolean {

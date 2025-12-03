@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -34,9 +36,10 @@ interface UpcomingMeeting {
   templateUrl: './employee-dashboard.component.html',
   styleUrls: ['./employee-dashboard.component.scss']
 })
-export class EmployeeDashboardComponent implements OnInit {
+export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   loading = true;
   user: any;
+  private readonly destroy$ = new Subject<void>();
 
   kpiData = {
     myBookings: 0,
@@ -49,15 +52,22 @@ export class EmployeeDashboardComponent implements OnInit {
   recentActivity: any[] = [];
 
   constructor(
-    private bookingService: BookingService,
-    private authService: AuthService
+    private readonly bookingService: BookingService,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser.subscribe(user => {
-      this.user = user;
-    });
+    this.authService.currentUser
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.user = user;
+      });
     this.loadEmployeeData();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadEmployeeData(): void {
@@ -65,39 +75,56 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.bookingService.getMyRequests().subscribe({
       next: (bookings) => {
-        console.log('Employee bookings received:', bookings);
-        
+        // Pre-calculate time boundaries once
         const now = new Date();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrowStart = new Date(todayStart);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-        // Calculate KPIs
-        this.kpiData.myBookings = bookings.filter(b => b.status === 'Booked').length;
-        this.kpiData.upcomingMeetings = bookings.filter(b => {
-          const bookingDateTime = new Date(`${b.date}T${b.startTime}`);
-          return bookingDateTime > now && b.status === 'Booked';
-        }).length;
-        this.kpiData.pendingRequests = bookings.filter(b => b.status === 'Pending').length;
-        this.kpiData.completedToday = bookings.filter(b => {
+        // Single-pass calculation for all metrics
+        let bookedCount = 0;
+        let upcomingCount = 0;
+        let pendingCount = 0;
+        let completedTodayCount = 0;
+        const upcomingBookings: any[] = [];
+
+        for (const b of bookings) {
+          const status = b.status;
           const bookingDate = new Date(b.date);
+          const startDateTime = new Date(`${b.date}T${b.startTime}`);
           const endDateTime = new Date(`${b.date}T${b.endTime}`);
-          return bookingDate >= today && bookingDate < tomorrow && 
-                 endDateTime < now &&
-                 b.status === 'Booked';
-        }).length;
 
-        // Get upcoming meetings
-        this.upcomingMeetings = bookings
-          .filter(b => {
-            const bookingDateTime = new Date(`${b.date}T${b.startTime}`);
-            return bookingDateTime >= now && b.status === 'Booked';
-          })
-          .sort((a, b) => {
-            const aTime = new Date(`${a.date}T${a.startTime}`);
-            const bTime = new Date(`${b.date}T${b.startTime}`);
-            return aTime.getTime() - bTime.getTime();
+          // Count by status
+          if (status === 'Pending') {
+            pendingCount++;
+          } else if (status === 'Booked') {
+            bookedCount++;
+
+            // Check if upcoming
+            if (startDateTime > now) {
+              upcomingCount++;
+              upcomingBookings.push(b);
+            }
+
+            // Check if completed today
+            if (bookingDate >= todayStart && bookingDate < tomorrowStart && endDateTime < now) {
+              completedTodayCount++;
+            }
+          }
+        }
+
+        // Set KPIs
+        this.kpiData.myBookings = bookedCount;
+        this.kpiData.upcomingMeetings = upcomingCount;
+        this.kpiData.pendingRequests = pendingCount;
+        this.kpiData.completedToday = completedTodayCount;
+
+        // Sort and map upcoming meetings (already filtered)
+        this.upcomingMeetings = upcomingBookings
+          .toSorted((a, b) => {
+            const aTime = new Date(`${a.date}T${a.startTime}`).getTime();
+            const bTime = new Date(`${b.date}T${b.startTime}`).getTime();
+            return aTime - bTime;
           })
           .slice(0, 5)
           .map(b => ({
@@ -110,9 +137,9 @@ export class EmployeeDashboardComponent implements OnInit {
             status: b.status
           }));
 
-        // Get recent activity (last 5 bookings)
+        // Get recent activity (last 5 bookings by date)
         this.recentActivity = bookings
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .toSorted((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 5)
           .map(b => ({
             id: b.id,
@@ -125,7 +152,6 @@ export class EmployeeDashboardComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading employee data:', error);
         this.loading = false;
       }
     });
@@ -158,10 +184,10 @@ export class EmployeeDashboardComponent implements OnInit {
   formatTime(time: string): string {
     // Convert 24h to 12h format
     const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour = Number.parseInt(hours);
     const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    const period = hour >= 12 ? 'PM' : 'AM';
+    return `${displayHour}:${minutes} ${period}`;
   }
 
   getStatusClass(status: string): 'success' | 'pending' | 'error' | 'warning' {

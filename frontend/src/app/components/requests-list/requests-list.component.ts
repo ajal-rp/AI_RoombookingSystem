@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -49,7 +49,7 @@ export type FilterTime = 'all' | 'today' | 'upcoming' | 'past';
   templateUrl: './requests-list.component.html',
   styleUrls: ['./requests-list.component.scss']
 })
-export class RequestsListComponent implements OnInit {
+export class RequestsListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['id', 'employeeName', 'roomName', 'date', 'time', 'purpose', 'status', 'actions'];
   dataSource: MatTableDataSource<BookingRequest>;
   loading = false;
@@ -66,11 +66,11 @@ export class RequestsListComponent implements OnInit {
   allRequests: BookingRequest[] = [];
 
   constructor(
-    private bookingService: BookingService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private router: Router
+    private readonly bookingService: BookingService,
+    private readonly authService: AuthService,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog,
+    private readonly router: Router
   ) {
     this.isAdmin = this.authService.isAdmin;
     this.dataSource = new MatTableDataSource<BookingRequest>([]);
@@ -87,69 +87,86 @@ export class RequestsListComponent implements OnInit {
 
   loadRequests(): void {
     this.loading = true;
-    const request$ = this.isAdmin 
-      ? this.bookingService.getBookingRequests(undefined, undefined, undefined, 1, 1000)
-      : this.bookingService.getMyRequests();
-
-    request$.subscribe({
-      next: (response: any) => {
-        if (this.isAdmin && response.data) {
-          this.allRequests = response.data;
-        } else {
-          this.allRequests = Array.isArray(response) ? response : [];
+    
+    if (this.isAdmin) {
+      this.bookingService.getBookingRequests(undefined, undefined, undefined, 1, 1000).subscribe({
+        next: (response: any) => {
+          this.allRequests = response.data || [];
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading requests:', error);
+          this.snackBar.open('Failed to load booking requests', 'Close', { duration: 3000 });
+          this.allRequests = [];
+          this.dataSource.data = [];
+          this.loading = false;
         }
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading requests:', error);
-        this.snackBar.open('Failed to load booking requests', 'Close', { duration: 3000 });
-        this.allRequests = [];
-        this.dataSource.data = [];
-        this.loading = false;
-      }
-    });
+      });
+    } else {
+      this.bookingService.getMyRequests().subscribe({
+        next: (response: BookingRequest[]) => {
+          this.allRequests = response;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading requests:', error);
+          this.snackBar.open('Failed to load booking requests', 'Close', { duration: 3000 });
+          this.allRequests = [];
+          this.dataSource.data = [];
+          this.loading = false;
+        }
+      });
+    }
   }
 
   applyFilters(): void {
-    let filtered = this.allRequests.filter((request: BookingRequest) => {
-      if (this.statusFilter !== 'all' && request.status !== this.statusFilter) {
-        return false;
-      }
-
-      if (this.timeFilter !== 'all') {
-        const requestDate = new Date(request.startTime);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        switch (this.timeFilter) {
-          case 'today':
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            if (requestDate < today || requestDate >= tomorrow) return false;
-            break;
-          case 'upcoming':
-            if (requestDate < new Date()) return false;
-            break;
-          case 'past':
-            if (requestDate >= new Date()) return false;
-            break;
-        }
-      }
-
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        const matchesSearch = 
-          request.employeeName?.toLowerCase().includes(query) ||
-          request.roomName?.toLowerCase().includes(query) ||
-          request.purpose?.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      return true;
-    });
+    const filtered = this.allRequests.filter((request: BookingRequest) => 
+      this.matchesStatusFilter(request) &&
+      this.matchesTimeFilter(request) &&
+      this.matchesSearchQuery(request)
+    );
 
     this.dataSource.data = filtered;
+  }
+
+  private matchesStatusFilter(request: BookingRequest): boolean {
+    return this.statusFilter === 'all' || request.status === this.statusFilter;
+  }
+
+  private matchesTimeFilter(request: BookingRequest): boolean {
+    if (this.timeFilter === 'all') return true;
+
+    const requestDate = new Date(request.startTime);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    switch (this.timeFilter) {
+      case 'today': {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return requestDate >= today && requestDate < tomorrow;
+      }
+      case 'upcoming':
+        return requestDate >= new Date();
+      case 'past':
+        return requestDate < new Date();
+      default:
+        return true;
+    }
+  }
+
+  private matchesSearchQuery(request: BookingRequest): boolean {
+    if (!this.searchQuery) return true;
+
+    const query = this.searchQuery.toLowerCase();
+    return (
+      request.employeeName?.toLowerCase().includes(query) ||
+      request.roomName?.toLowerCase().includes(query) ||
+      request.purpose?.toLowerCase().includes(query) ||
+      false
+    );
   }
 
   onStatusFilterChange(status: string): void {
@@ -178,7 +195,7 @@ export class RequestsListComponent implements OnInit {
   formatTime(timeString: string): string {
     if (!timeString) return '';
     const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours);
+    const hour = Number.parseInt(hours);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;

@@ -1,8 +1,8 @@
 # Conference Room Booking System
 
-A full-stack conference room booking system built with .NET 8 Web API and Angular 17, featuring JWT authentication, clean architecture, and role-based access control.
+A full-stack web application for managing conference room bookings with role-based access control.
 
-## 🚀 Features
+## 📋 Features
 
 ### Backend (.NET 8 Web API)
 - **Clean Architecture** with Domain, Application, Infrastructure, and API layers
@@ -116,31 +116,29 @@ frontend/
 - `POST /api/bookingrequests/{id}/confirm` - Confirm request (Admin only)
 - `POST /api/bookingrequests/{id}/reject` - Reject request (Admin only)
 - `GET /api/bookingrequests/check-availability` - Check room availability
-- `POST /api/bookingrequests/{id}/reject` - Reject request (Admin only)
-- `GET /api/bookingrequests/check-availability` - Check room availability
 
-## 🚀 Getting Started
+## 📦 Installation
 
 ### Prerequisites
 - .NET 8 SDK
-- Node.js (v18+)
+- Node.js 20+
 - SQL Server or LocalDB
 - Angular CLI (`npm install -g @angular/cli`)
 
 ### Backend Setup
 
-1. **Navigate to the solution directory**
-   ```powershell
-   cd "{workspace}\AITutorial"
+1. **Navigate to the API directory**
+   ```bash
+   cd backend/src/ConferenceRoomBooking.API
    ```
 
-2. **Restore NuGet packages**
-   ```powershell
+2. **Restore dependencies**
+   ```bash
    dotnet restore
    ```
 
 3. **Update database connection string** (if needed)
-   Edit `backend/src/ConferenceRoomBooking.API/appsettings.json`:
+   Edit `appsettings.json`:
    ```json
    "ConnectionStrings": {
      "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ConferenceRoomBookingDb;Trusted_Connection=true;TrustServerCertificate=true;"
@@ -148,30 +146,25 @@ frontend/
    ```
 
 4. **Apply database migrations**
-   ```powershell
-   cd backend\src\ConferenceRoomBooking.API
-   dotnet ef migrations add InitialCreate --project ..\ConferenceRoomBooking.Infrastructure\ConferenceRoomBooking.Infrastructure.csproj
+   ```bash
    dotnet ef database update
    ```
 
 5. **Run the API**
-   ```powershell
+   ```bash
    dotnet run
    ```
-   API will be available at: `https://localhost:7001` (or check console output)
-
-6. **Access Swagger UI**
-   Navigate to: `https://localhost:7001/swagger`
+   API will be available at: `https://localhost:7001`
 
 ### Frontend Setup
 
 1. **Navigate to frontend directory**
-   ```powershell
+   ```bash
    cd frontend
    ```
 
 2. **Install dependencies**
-   ```powershell
+   ```bash
    npm install
    ```
 
@@ -180,79 +173,93 @@ frontend/
    ```typescript
    export const environment = {
      production: false,
-## 👤 Demo Credentials
+     apiUrl: 'https://localhost:7001/api'
+   };
+   ```
 
-### Admin Account
-- **Username**: `admin`
-- **Password**: `Password123!`
-- **Name**: System Administrator
+4. **Start development server**
+   ```bash
+   ng serve
+   ```
+   Frontend will be available at: `http://localhost:4200`
 
-### Employee Accounts
-- **Username**: `john.doe` | **Password**: `Password123!` | **Name**: John Michael Doe
-- **Username**: `jane.smith` | **Password**: `Password123!` | **Name**: Jane Smith
+## 📚 Documentation
 
-## 🔒 Security Features
+- [Backend API Documentation](backend/README.md)
+- [Frontend Documentation](frontend/README.md)
 
-- JWT token-based authentication
-- Role-based authorization (Employee/Admin)
-- Password hashing with BCrypt
-- Strong password validation (min 8 chars, uppercase, lowercase, number, special char)
-- HTTP-only token storage
-- Protected API endpoints
-- CORS configuration
-- Email and username uniqueness enforcementn.doe` | **Password**: `Password123!`
-- **Username**: `jane.smith` | **Password**: `Password123!`
+## 🔐 Default Credentials
 
-## 🔒 Security Features
+**Admin Account:**
+- Username: `admin`
+- Password: `Admin@123`
 
-- JWT token-based authentication
-- Role-based authorization (Employee/Admin)
-- Password hashing with BCrypt
-- HTTP-only token storage
-- Protected API endpoints
-- CORS configuration
+**Employee Account:**
+- Username: `john.doe`
+- Password: `Employee@123`
 
-## 📝 Key Features Implementation
+⚠️ Change these in production!
 
-### Double-Booking Prevention
-The system checks for overlapping bookings before:
-1. Creating a new booking request
-2. Confirming a pending request
+## 🏗️ Project Structure
 
-Logic: `(b.StartTime < request.EndTime && b.EndTime > request.StartTime)`
+```
+.
+├── backend/                 # ASP.NET Core Web API
+│   ├── ConferenceRoomBooking.sln
+│   └── src/
+│       ├── ConferenceRoomBooking.API/
+│       ├── ConferenceRoomBooking.Application/
+│       ├── ConferenceRoomBooking.Domain/
+│       └── ConferenceRoomBooking.Infrastructure/
+├── frontend/               # Angular Application
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   ├── services/
+│   │   │   ├── guards/
+│   │   │   └── models/
+│   │   └── environments/
+│   ├── angular.json
+│   └── package.json
+```
 
-### CQRS Pattern
-- **Commands**: CreateBookingRequest, ConfirmBookingRequest, RejectBookingRequest
-- **Queries**: GetPendingRequests, GetEmployeeRequests, CheckAvailability, GetAllRooms
+## 🧪 Running Tests
 
-### Validation
-- FluentValidation for command validation
-- Date must be today or future
-- End time must be after start time
-- Room availability checks
+### Backend Tests
+```bash
+cd backend
+dotnet test --verbosity normal
+```
 
-## 🎨 UI Features
-
-### Employee Dashboard
-- Create new booking requests
-- View all personal booking requests
-- See request status (Pending/Booked/Rejected)
-- Real-time updates
-
-### Admin Dashboard
-- View all pending booking requests
-- Confirm or reject requests
-- Add rejection reason (optional)
-- Prevent double-booking conflicts
-
-## 📄 License
-
-This is a demo project for educational purposes.
+### Frontend Tests
+```bash
+cd frontend
+npm run test
+```
 
 ## 🤝 Contributing
 
-This is a sample project. Feel free to fork and modify as needed.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📧 Support
+## 📝 License
 
-For issues or questions, please create an issue in the repository.
+This project is licensed under the MIT License.
+
+## 👥 Authors
+
+- **AJALRP** - [ajal-rp](https://github.com/ajal-rp)
+
+## 🙏 Acknowledgments
+
+- Angular Material for UI components
+- ASP.NET Core for backend framework
+- Entity Framework Core for ORM
+- MediatR for CQRS implementation
+
+---
+
+⭐ Star this repository if you find it helpful!

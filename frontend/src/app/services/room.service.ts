@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, shareReplay, tap, retry } from 'rxjs/operators';
 import { Room } from '../models/room.model';
 import { environment } from '../../environments/environment';
@@ -11,7 +11,10 @@ import { environment } from '../../environments/environment';
 export class RoomService {
   private readonly apiUrl = `${environment.apiUrl}/rooms`;
   private roomsCache$?: Observable<Room[]>;
+  private scheduleCache$?: Observable<any[]>;
   private readonly CACHE_SIZE = 1;
+  private readonly CACHE_DURATION = 300000; // 5 minutes
+  private lastScheduleFetch = 0;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -45,10 +48,20 @@ export class RoomService {
   }
 
   getRoomSchedules(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/schedule`).pipe(
+    const now = Date.now();
+    // Return cached data if still fresh (within 5 minutes)
+    if (this.scheduleCache$ && (now - this.lastScheduleFetch) < this.CACHE_DURATION) {
+      return this.scheduleCache$;
+    }
+
+    this.lastScheduleFetch = now;
+    this.scheduleCache$ = this.http.get<any[]>(`${this.apiUrl}/schedule`).pipe(
       retry(2),
-      catchError(this.handleError)
+      catchError(this.handleError),
+      shareReplay({ bufferSize: this.CACHE_SIZE, refCount: true })
     );
+
+    return this.scheduleCache$;
   }
 
   getRoomById(id: number): Observable<Room> {
@@ -67,6 +80,8 @@ export class RoomService {
 
   clearCache(): void {
     this.roomsCache$ = undefined;
+    this.scheduleCache$ = undefined;
+    this.lastScheduleFetch = 0;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
@@ -80,7 +95,6 @@ export class RoomService {
       errorMessage = error.error?.message || `Server error: ${error.status}`;
     }
     
-    console.error('RoomService error:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

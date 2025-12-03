@@ -26,15 +26,16 @@ public class GetAllRoomsQueryHandler : IRequestHandler<GetAllRoomsQuery, List<Ro
 
     public async Task<List<RoomDto>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Rooms.AsQueryable();
+        var query = _context.Rooms.AsNoTracking().AsQueryable();
 
-        // Apply filters
+        // Apply filters with optimized string comparisons
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
+            var searchLower = request.Search.ToLower();
             query = query.Where(r => 
-                r.Name.Contains(request.Search) || 
-                (r.Description != null && r.Description.Contains(request.Search)) ||
-                (r.Location != null && r.Location.Contains(request.Search)));
+                EF.Functions.Like(r.Name.ToLower(), $"%{searchLower}%") || 
+                (r.Description != null && EF.Functions.Like(r.Description.ToLower(), $"%{searchLower}%")) ||
+                (r.Location != null && EF.Functions.Like(r.Location.ToLower(), $"%{searchLower}%")));
         }
 
         if (request.MinCapacity.HasValue)
@@ -44,7 +45,8 @@ public class GetAllRoomsQueryHandler : IRequestHandler<GetAllRoomsQuery, List<Ro
 
         if (!string.IsNullOrWhiteSpace(request.Location))
         {
-            query = query.Where(r => r.Location != null && r.Location.Contains(request.Location));
+            var locationLower = request.Location.ToLower();
+            query = query.Where(r => r.Location != null && EF.Functions.Like(r.Location.ToLower(), $"%{locationLower}%"));
         }
 
         var rooms = await query

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,8 +7,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-notification-bell',
@@ -26,20 +29,29 @@ import { Router } from '@angular/router';
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss']
 })
-export class NotificationBellComponent implements OnInit {
+export class NotificationBellComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   unreadCount = 0;
   loading = false;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private notificationService: NotificationService,
-    private router: Router
+    private readonly notificationService: NotificationService,
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.notificationService.unreadCount$.subscribe(count => {
-      this.unreadCount = count;
-    });
+    this.notificationService.unreadCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => {
+        this.unreadCount = count;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadNotifications(): void {
@@ -61,6 +73,9 @@ export class NotificationBellComponent implements OnInit {
       this.notificationService.markAsRead(notification.id).subscribe({
         next: () => {
           notification.isRead = true;
+        },
+        error: () => {
+          this.snackBar.open('Failed to mark notification as read', 'Close', { duration: 3000 });
         }
       });
     }
@@ -69,7 +84,12 @@ export class NotificationBellComponent implements OnInit {
   markAllAsRead(): void {
     this.notificationService.markAllAsRead().subscribe({
       next: () => {
-        this.notifications.forEach(n => n.isRead = true);
+        for (const n of this.notifications) {
+          n.isRead = true;
+        }
+      },
+      error: () => {
+        this.snackBar.open('Failed to mark all as read', 'Close', { duration: 3000 });
       }
     });
   }

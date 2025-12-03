@@ -119,7 +119,6 @@ export class RoomsComponent implements OnInit {
         this.loading = false;
       },
       error: (error: any) => {
-        console.error('Error loading rooms:', error);
         this.loading = false;
       }
     });
@@ -136,39 +135,35 @@ export class RoomsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.filteredRooms = this.rooms.filter(room => {
-      // Search filter
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        const matchesSearch = room.name.toLowerCase().includes(query) ||
-                            room.location.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
+    const searchLower = this.searchQuery?.toLowerCase() || '';
+    const hasSearch = searchLower.length > 0;
 
-      // Capacity filter
-      if (this.minCapacity !== null) {
-        if (this.minCapacity === 21) {
-          if (room.capacity < 21) return false;
-        } else {
-          if (room.capacity < this.minCapacity) return false;
-        }
-      }
+    this.filteredRooms = this.rooms.filter(room => 
+      this.matchesSearchFilter(room, hasSearch, searchLower) &&
+      this.matchesCapacityFilter(room) &&
+      this.matchesStatusFilter(room) &&
+      this.matchesAmenitiesFilter(room)
+    );
+  }
 
-      // Status filter
-      if (this.selectedStatus !== 'all' && room.status !== this.selectedStatus) {
-        return false;
-      }
+  private matchesSearchFilter(room: any, hasSearch: boolean, searchLower: string): boolean {
+    if (!hasSearch) return true;
+    return room.name.toLowerCase().includes(searchLower) ||
+           room.location.toLowerCase().includes(searchLower);
+  }
 
-      // Amenities filter
-      if (this.selectedAmenities.length > 0) {
-        const hasAllAmenities = this.selectedAmenities.every(amenity =>
-          room.amenities.includes(amenity)
-        );
-        if (!hasAllAmenities) return false;
-      }
+  private matchesCapacityFilter(room: any): boolean {
+    if (this.minCapacity === null) return true;
+    return this.minCapacity === 21 ? room.capacity >= 21 : room.capacity >= this.minCapacity;
+  }
 
-      return true;
-    });
+  private matchesStatusFilter(room: any): boolean {
+    return this.selectedStatus === 'all' || room.status === this.selectedStatus;
+  }
+
+  private matchesAmenitiesFilter(room: any): boolean {
+    if (this.selectedAmenities.length === 0) return true;
+    return this.selectedAmenities.every(amenity => room.amenities.includes(amenity));
   }
 
   clearFilters(): void {
@@ -212,5 +207,10 @@ export class RoomsComponent implements OnInit {
 
   setViewMode(mode: 'grid' | 'list'): void {
     this.viewMode = mode;
+  }
+
+  toggleFilters(): void {
+    // Placeholder method for filter panel toggle
+    // Can be expanded to show/hide filter panel on mobile
   }
 }

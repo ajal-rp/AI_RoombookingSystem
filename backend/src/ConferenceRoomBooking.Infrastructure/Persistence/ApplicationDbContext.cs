@@ -26,6 +26,23 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         modelBuilder.ApplyConfiguration(new BookingRequestConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
+        // Add indexes for optimized queries
+        modelBuilder.Entity<BookingRequest>()
+            .HasIndex(b => new { b.RoomId, b.Date, b.Status })
+            .HasDatabaseName("IX_BookingRequests_RoomId_Date_Status");
+
+        modelBuilder.Entity<BookingRequest>()
+            .HasIndex(b => b.Status)
+            .HasDatabaseName("IX_BookingRequests_Status");
+
+        modelBuilder.Entity<Room>()
+            .HasIndex(r => r.Name)
+            .HasDatabaseName("IX_Rooms_Name");
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .HasDatabaseName("IX_Users_Email");
+
         // Seed data
         SeedData(modelBuilder);
     }

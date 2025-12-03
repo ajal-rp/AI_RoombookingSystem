@@ -5,6 +5,7 @@ using ConferenceRoomBooking.Application.Features.BookingRequests.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace ConferenceRoomBooking.API.Controllers;
 
@@ -93,6 +94,7 @@ public class BookingRequestsController : ControllerBase
     /// </summary>
     [HttpGet("my-requests")]
     [Authorize(Roles = "Employee,Admin")]
+    [ResponseCache(Duration = 30, VaryByHeader = "Authorization")]
     public async Task<ActionResult<List<BookingRequestDto>>> GetEmployeeBookingRequests()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;

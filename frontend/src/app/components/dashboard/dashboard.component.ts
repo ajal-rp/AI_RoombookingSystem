@@ -48,8 +48,8 @@ export class DashboardComponent implements OnInit {
   upcomingMeetings: UpcomingMeeting[] = [];
 
   constructor(
-    private roomService: RoomService,
-    private bookingService: BookingService
+    private readonly roomService: RoomService,
+    private readonly bookingService: BookingService
   ) {
     this.generateUpcomingDays();
   }
@@ -67,41 +67,54 @@ export class DashboardComponent implements OnInit {
       requests: this.bookingService.getBookingRequests()
     }).subscribe({
       next: (data: any) => {
-        console.log('Dashboard data received:', data);
-        
         // Extract the actual data array from paginated response
         const requestsData = data.requests.data || data.requests || [];
-        
-        console.log('Requests data:', requestsData);
-        console.log('Rooms:', data.rooms);
-        console.log('Schedule:', data.schedule);
         
         // Calculate KPIs
         this.kpiData.totalRooms = data.rooms.length;
         this.kpiData.availableNow = data.schedule.filter((s: any) => s.status === 'Available').length;
-        this.kpiData.pendingRequests = requestsData.filter((r: any) => r.status === 'Pending').length;
         
-        // Calculate today's meetings
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Pre-calculate date boundaries once
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        this.kpiData.todaysMeetings = requestsData.filter((r: any) => {
-          const bookingDate = new Date(r.date);
-          return bookingDate >= today && bookingDate < tomorrow && r.status === 'Booked';
-        }).length;
+        // Single pass through requests for multiple calculations
+        let pendingCount = 0;
+        let todaysMeetingsCount = 0;
+        const upcomingBookings: any[] = [];
 
-        // Get upcoming meetings
-        this.upcomingMeetings = requestsData
-          .filter((r: any) => {
+        for (const r of requestsData) {
+          if (r.status === 'Pending') {
+            pendingCount++;
+          }
+
+          if (r.status === 'Booked') {
+            const bookingDate = new Date(r.date);
+            
+            // Check if it's today
+            if (bookingDate >= today && bookingDate < tomorrow) {
+              todaysMeetingsCount++;
+            }
+
+            // Check if it's upcoming
             const startDateTime = new Date(`${r.date}T${r.startTime}`);
-            return startDateTime >= new Date() && r.status === 'Booked';
-          })
-          .sort((a: any, b: any) => {
-            const aTime = new Date(`${a.date}T${a.startTime}`);
-            const bTime = new Date(`${b.date}T${b.startTime}`);
-            return aTime.getTime() - bTime.getTime();
+            if (startDateTime >= now) {
+              upcomingBookings.push(r);
+            }
+          }
+        }
+
+        this.kpiData.pendingRequests = pendingCount;
+        this.kpiData.todaysMeetings = todaysMeetingsCount;
+
+        // Sort and slice upcoming meetings
+        this.upcomingMeetings = upcomingBookings
+          .toSorted((a: any, b: any) => {
+            const aTime = new Date(`${a.date}T${a.startTime}`).getTime();
+            const bTime = new Date(`${b.date}T${b.startTime}`).getTime();
+            return aTime - bTime;
           })
           .slice(0, 5)
           .map((r: any) => ({
@@ -116,7 +129,6 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        console.error('Error loading dashboard data:', err);
         this.loading = false;
       }
     });

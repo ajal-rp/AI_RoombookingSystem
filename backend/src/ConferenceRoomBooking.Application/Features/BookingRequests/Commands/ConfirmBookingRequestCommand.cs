@@ -50,14 +50,16 @@ public class ConfirmBookingRequestCommandHandler : IRequestHandler<ConfirmBookin
                 $"Current status: {bookingRequest.Status}");
         }
 
-        // Double-check for overlaps before confirming
+        // Double-check for overlaps before confirming - optimized query
+        var normalizedDate = bookingRequest.Date;
         var hasOverlap = await _context.BookingRequests
-            .AnyAsync(b => 
+            .AsNoTracking()
+            .Where(b => 
                 b.Id != request.Id &&
                 b.RoomId == bookingRequest.RoomId &&
-                b.Date.Date == bookingRequest.Date.Date &&
-                b.Status == BookingStatus.Booked &&
-                (b.StartTime < bookingRequest.EndTime && b.EndTime > bookingRequest.StartTime),
+                b.Date == normalizedDate &&
+                b.Status == BookingStatus.Booked)
+            .AnyAsync(b => b.StartTime < bookingRequest.EndTime && b.EndTime > bookingRequest.StartTime,
                 cancellationToken);
 
         if (hasOverlap)
@@ -73,12 +75,18 @@ public class ConfirmBookingRequestCommandHandler : IRequestHandler<ConfirmBookin
         bookingRequest.Status = BookingStatus.Booked;
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Get employee and room details for notification
-        var employee = await _context.Users
+        // Get employee and room details in parallel for notification
+        var employeeTask = _context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == bookingRequest.EmployeeId, cancellationToken);
         
-        var room = await _context.Rooms
+        var roomTask = _context.Rooms
+            .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == bookingRequest.RoomId, cancellationToken);
+
+        await Task.WhenAll(employeeTask, roomTask);
+        var employee = await employeeTask;
+        var room = await roomTask;
 
         if (employee != null && room != null)
         {

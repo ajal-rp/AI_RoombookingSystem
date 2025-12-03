@@ -22,6 +22,7 @@ public class GetPendingBookingRequestsQueryHandler : IRequestHandler<GetPendingB
     public async Task<List<BookingRequestDto>> Handle(GetPendingBookingRequestsQuery request, CancellationToken cancellationToken)
     {
         var bookings = await _context.BookingRequests
+            .AsNoTracking()
             .Include(b => b.Room)
             .Where(b => b.Status == BookingStatus.Pending)
             .OrderBy(b => b.CreatedAt)

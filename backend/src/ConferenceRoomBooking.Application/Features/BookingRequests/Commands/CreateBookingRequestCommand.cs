@@ -61,13 +61,15 @@ public class CreateBookingRequestCommandHandler : IRequestHandler<CreateBookingR
                 $"Start: {request.StartTime}, End: {request.EndTime}");
         }
 
-        // Check for overlapping bookings
+        // Check for overlapping bookings - optimized query
+        var normalizedDate = request.Date.Date;
         var hasOverlap = await _context.BookingRequests
-            .AnyAsync(b => 
+            .AsNoTracking()
+            .Where(b => 
                 b.RoomId == request.RoomId &&
-                b.Date.Date == request.Date.Date &&
-                b.Status == BookingStatus.Booked &&
-                (b.StartTime < request.EndTime && b.EndTime > request.StartTime),
+                b.Date == normalizedDate &&
+                b.Status == BookingStatus.Booked)
+            .AnyAsync(b => b.StartTime < request.EndTime && b.EndTime > request.StartTime,
                 cancellationToken);
 
         if (hasOverlap)

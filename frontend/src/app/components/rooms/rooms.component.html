@@ -6,10 +6,10 @@
       <p class="subtitle">Browse and book available meeting spaces</p>
     </div>
     <div class="header-actions">
-      <app-button variant="outline" icon="filter_list">
+      <app-button variant="outline" icon="filter_list" (click)="toggleFilters()" (keydown.enter)="toggleFilters()">
         Filters
       </app-button>
-      <app-button *ngIf="isAdmin" variant="primary" icon="add" (click)="addNewRoom()">
+      <app-button *ngIf="isAdmin" variant="primary" icon="add" (click)="addNewRoom()" (keydown.enter)="addNewRoom()">
         New Room
       </app-button>
     </div>

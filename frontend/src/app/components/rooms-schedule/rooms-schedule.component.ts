@@ -14,6 +14,22 @@ import { finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { CardComponent } from '../../shared/components/card/card.component';
 
+interface BookingData {
+  employeeName: string;
+  startTime: string;
+  endTime: string;
+  purpose: string;
+  status: string;
+}
+
+interface RoomData {
+  id: number;
+  name: string;
+  location: string;
+  capacity: number;
+  bookings?: BookingData[];
+}
+
 interface RoomSchedule {
   id: string;
   name: string;
@@ -61,7 +77,18 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  oldColumnDefs_removed: any[] = [
+  // Old AG Grid configuration - kept for reference but not used
+  oldColumnDefs_removed: Array<{
+    field: string;
+    headerName: string;
+    filter?: boolean;
+    floatingFilter?: boolean;
+    minWidth?: number;
+    maxWidth?: number;
+    flex?: number;
+    cellStyle?: Record<string, string>;
+    cellRenderer?: (params: { value: string }) => string;
+  }> = [
     {
       field: 'name',
       headerName: 'Room Name',
@@ -105,8 +132,6 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
       headerName: 'Current Booking',
       minWidth: 250,
       flex: 2,
-      wrapText: true,
-      autoHeight: true,
       cellRenderer: (params: any) => {
         const booking = params.value;
         if (!booking) return '<span style="color: #9ca3af; font-style: italic;">No active booking</span>';
@@ -124,8 +149,6 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
       headerName: 'Next Booking',
       minWidth: 220,
       flex: 1.5,
-      wrapText: true,
-      autoHeight: true,
       cellRenderer: (params: any) => {
         const booking = params.value;
         if (!booking) return '<span style="color: #9ca3af; font-style: italic;">No upcoming booking</span>';
@@ -164,40 +187,34 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
 
   loadRoomsSchedule(): void {
     this.loading = true;
-    console.log('Loading room schedules from:', `${environment.apiUrl}/rooms/schedule`);
     
-    this.http.get<any[]>(`${environment.apiUrl}/rooms/schedule`)
+    this.http.get<RoomData[]>(`${environment.apiUrl}/rooms/schedule`)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (data) => {
-          console.log('Received room schedule data:', data);
           const mappedRooms = data.map(room => this.mapRoomSchedule(room));
           this.dataSource.data = mappedRooms;
-          console.log('Mapped rooms:', mappedRooms);
         },
         error: (error) => {
-          console.error('Error loading room schedules:', error);
           this.snackBar.open('Failed to load room schedules', 'Close', { duration: 3000 });
         }
       });
   }
 
-  private mapRoomSchedule(room: any): RoomSchedule {
+  private mapRoomSchedule(room: RoomData): RoomSchedule {
     const now = new Date();
     const currentTime = now.toTimeString().slice(0, 8);
     
-    console.log('Mapping room:', room.name, 'Bookings:', room.bookings);
-    
     // Find current booking (backend uses "Booked" status, not "Approved")
-    const currentBooking = room.bookings?.find((b: any) => 
+    const currentBooking = room.bookings?.find((b: BookingData) => 
       b.startTime <= currentTime && 
       b.endTime >= currentTime
     );
 
     // Find next booking
     const nextBooking = room.bookings
-      ?.filter((b: any) => b.startTime > currentTime)
-      ?.sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))[0];
+      ?.filter((b: BookingData) => b.startTime > currentTime)
+      ?.sort((a: BookingData, b: BookingData) => a.startTime.localeCompare(b.startTime))[0];
 
     // Determine status
     let status: 'Available' | 'Occupied' | 'Reserved' = 'Available';
@@ -208,7 +225,7 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
     }
 
     return {
-      id: room.id,
+      id: room.id.toString(),
       name: room.name,
       location: room.location,
       capacity: room.capacity,
