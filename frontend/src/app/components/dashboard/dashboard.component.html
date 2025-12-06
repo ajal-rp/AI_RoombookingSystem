@@ -8,7 +8,7 @@
       <app-button variant="outline" icon="refresh" (clicked)="loadDashboardData()">
         Refresh
       </app-button>
-      <app-button variant="primary" icon="add" routerLink="/dashboard/requests/new">
+      <app-button variant="primary" icon="add" [routerLink]="['/dashboard/book-room']">
         Book Room
       </app-button>
     </div>
@@ -19,32 +19,32 @@
     <app-kpi-card
       label="Total Rooms"
       [value]="kpiData.totalRooms"
-      icon="meeting_room"
-      iconBackground="var(--color-primary)"
+      icon="trending_up"
+      gradientBackground="linear-gradient(135deg, #FE9496 0%, #FFA07A 100%)"
       [loading]="loading">
     </app-kpi-card>
 
     <app-kpi-card
       label="Available Now"
       [value]="kpiData.availableNow"
-      icon="check_circle"
-      iconBackground="var(--color-accent)"
+      icon="content_copy"
+      gradientBackground="linear-gradient(135deg, #4BCBEB 0%, #5AB9EA 100%)"
       [loading]="loading">
     </app-kpi-card>
 
     <app-kpi-card
       label="Pending Requests"
       [value]="kpiData.pendingRequests"
-      icon="schedule"
-      iconBackground="var(--color-warning)"
+      icon="favorite"
+      gradientBackground="linear-gradient(135deg, #1BCFB4 0%, #2DDCC4 100%)"
       [loading]="loading">
     </app-kpi-card>
 
     <app-kpi-card
       label="Today's Meetings"
       [value]="kpiData.todaysMeetings"
-      icon="event"
-      iconBackground="var(--color-info)"
+      icon="star"
+      gradientBackground="linear-gradient(135deg, #A05AFF 0%, #B57AFF 100%)"
       [loading]="loading">
     </app-kpi-card>
   </div>
@@ -96,7 +96,7 @@
     </div>
 
     <div footer class="card-footer-actions">
-      <app-button variant="outline" size="sm" routerLink="/dashboard/requests" [fullWidth]="true">
+      <app-button variant="outline" size="sm" [routerLink]="['/dashboard/requests']" [fullWidth]="true">
         View All Bookings
       </app-button>
     </div>
@@ -104,28 +104,34 @@
 
   <!-- Quick Actions -->
   <div class="quick-actions-grid">
-    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/rooms']" class="action-card">
-      <div class="action-content">
-        <mat-icon class="action-icon">view_list</mat-icon>
-        <h3>Browse Rooms</h3>
-        <p>View all available conference rooms</p>
-      </div>
-    </app-card>
+    <a [routerLink]="['/dashboard/rooms']" class="action-card-link">
+      <app-card [hoverable]="true" [clickable]="true" class="action-card">
+        <div class="action-content">
+          <mat-icon class="action-icon">view_list</mat-icon>
+          <h3>Browse Rooms</h3>
+          <p>View all available conference rooms</p>
+        </div>
+      </app-card>
+    </a>
 
-    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/calendar']" class="action-card">
-      <div class="action-content">
-        <mat-icon class="action-icon">calendar_month</mat-icon>
-        <h3>Calendar View</h3>
-        <p>See all bookings in calendar format</p>
-      </div>
-    </app-card>
+    <a [routerLink]="['/dashboard/calendar']" class="action-card-link">
+      <app-card [hoverable]="true" [clickable]="true" class="action-card">
+        <div class="action-content">
+          <mat-icon class="action-icon">calendar_month</mat-icon>
+          <h3>Calendar View</h3>
+          <p>See all bookings in calendar format</p>
+        </div>
+      </app-card>
+    </a>
 
-    <app-card [hoverable]="true" [clickable]="true" [routerLink]="['/dashboard/requests']" class="action-card">
-      <div class="action-content">
-        <mat-icon class="action-icon">pending_actions</mat-icon>
-        <h3>My Requests</h3>
-        <p>Manage your booking requests</p>
-      </div>
-    </app-card>
+    <a [routerLink]="['/dashboard/requests']" class="action-card-link">
+      <app-card [hoverable]="true" [clickable]="true" class="action-card">
+        <div class="action-content">
+          <mat-icon class="action-icon">pending_actions</mat-icon>
+          <h3>My Requests</h3>
+          <p>Manage your booking requests</p>
+        </div>
+      </app-card>
+    </a>
   </div>
 </div>

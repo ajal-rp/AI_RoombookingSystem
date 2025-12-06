@@ -8,6 +8,7 @@ public class RoomDto
     public string? Description { get; set; }
     public string? Location { get; set; }
     public List<string> Amenities { get; set; } = new();
+    public List<string> ImageUrls { get; set; } = new();
 }
 
 public class RoomScheduleDto

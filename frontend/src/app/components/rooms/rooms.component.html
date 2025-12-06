@@ -2,7 +2,10 @@
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1>Conference Rooms</h1>
+      <div class="header-title-row">
+        <app-back-button></app-back-button>
+        <h1>Conference Rooms</h1>
+      </div>
       <p class="subtitle">Browse and book available meeting spaces</p>
     </div>
     <div class="header-actions">
@@ -189,11 +192,28 @@
               Details
             </app-button>
             <app-button
+              *ngIf="!isAdmin"
               variant="primary"
               size="sm"
               icon="event"
               [disabled]="room.status !== 'Available'">
               Book Now
+            </app-button>
+            <app-button
+              *ngIf="isAdmin"
+              variant="primary"
+              size="sm"
+              icon="edit"
+              [routerLink]="['/dashboard/rooms/edit', room.id]">
+              Edit
+            </app-button>
+            <app-button
+              *ngIf="isAdmin"
+              variant="outline"
+              size="sm"
+              icon="delete"
+              (clicked)="deleteRoom(room.id)">
+              Delete
             </app-button>
           </div>
         </app-card>

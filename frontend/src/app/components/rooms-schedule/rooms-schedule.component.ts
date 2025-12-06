@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { CardComponent } from '../../shared/components/card/card.component';
+import { BackButtonComponent } from '../../shared/components/back-button/back-button.component';
 
 interface BookingData {
   employeeName: string;
@@ -64,7 +65,8 @@ interface RoomSchedule {
     MatPaginatorModule,
     MatSortModule,
     MatProgressSpinnerModule,
-    CardComponent
+    CardComponent,
+    BackButtonComponent
   ],
   templateUrl: './rooms-schedule.component.html',
   styleUrls: ['./rooms-schedule.component.scss']
@@ -203,17 +205,22 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
 
   private mapRoomSchedule(room: RoomData): RoomSchedule {
     const now = new Date();
-    const currentTime = now.toTimeString().slice(0, 8);
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
     
-    // Find current booking (backend uses "Booked" status, not "Approved")
-    const currentBooking = room.bookings?.find((b: BookingData) => 
-      b.startTime <= currentTime && 
-      b.endTime >= currentTime
-    );
+    // Find current booking
+    const currentBooking = room.bookings?.find((b: BookingData) => {
+      // Handle both HH:MM:SS and HH:MM formats
+      const startTime = b.startTime.slice(0, 5);
+      const endTime = b.endTime.slice(0, 5);
+      return startTime <= currentTime && endTime >= currentTime;
+    });
 
     // Find next booking
     const nextBooking = room.bookings
-      ?.filter((b: BookingData) => b.startTime > currentTime)
+      ?.filter((b: BookingData) => {
+        const startTime = b.startTime.slice(0, 5);
+        return startTime > currentTime;
+      })
       ?.sort((a: BookingData, b: BookingData) => a.startTime.localeCompare(b.startTime))[0];
 
     // Determine status
@@ -232,17 +239,26 @@ export class RoomsScheduleComponent implements OnInit, AfterViewInit {
       currentStatus: status,
       currentBooking: currentBooking ? {
         employeeName: currentBooking.employeeName,
-        startTime: currentBooking.startTime,
-        endTime: currentBooking.endTime,
+        startTime: this.formatTime(currentBooking.startTime),
+        endTime: this.formatTime(currentBooking.endTime),
         purpose: currentBooking.purpose
       } : undefined,
       nextBooking: nextBooking ? {
         employeeName: nextBooking.employeeName,
-        startTime: nextBooking.startTime,
+        startTime: this.formatTime(nextBooking.startTime),
         purpose: nextBooking.purpose
       } : undefined,
       todayBookingsCount: room.bookings?.length || 0
     };
+  }
+
+  formatTime(time: string): string {
+    // Handle both HH:MM:SS and HH:MM formats
+    const parts = time.split(':');
+    if (parts.length >= 2) {
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return time;
   }
 
   refreshData(): void {

@@ -6,6 +6,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
@@ -24,6 +25,7 @@ import { environment } from '../../../environments/environment';
     MatListModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
     NotificationBellComponent
   ],
   templateUrl: './main-layout.component.html',

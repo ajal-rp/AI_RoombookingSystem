@@ -78,6 +78,20 @@ export class RoomService {
     );
   }
 
+  updateRoom(id: number, room: Partial<Room>): Observable<Room> {
+    return this.http.put<Room>(`${this.apiUrl}/${id}`, { ...room, id }).pipe(
+      tap(() => this.clearCache()),
+      catchError(this.handleError)
+    );
+  }
+
+  deleteRoom(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.clearCache()),
+      catchError(this.handleError)
+    );
+  }
+
   clearCache(): void {
     this.roomsCache$ = undefined;
     this.scheduleCache$ = undefined;

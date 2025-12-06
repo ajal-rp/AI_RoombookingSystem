@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, AfterContentInit, ContentChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div [class]="getCardClasses()">
-      <div *ngIf="title || hasHeaderSlot" class="card-header">
+      <div *ngIf="title" class="card-header">
         <h3 *ngIf="title" class="card-title">{{ title }}</h3>
         <div *ngIf="subtitle" class="card-subtitle">{{ subtitle }}</div>
         <ng-content select="[header]"></ng-content>
@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
       <div class="card-body">
         <ng-content></ng-content>
       </div>
-      <div *ngIf="hasFooterSlot" class="card-footer">
+      <div class="card-footer">
         <ng-content select="[footer]"></ng-content>
       </div>
     </div>
@@ -28,11 +28,29 @@ import { CommonModule } from '@angular/common';
       box-shadow: var(--shadow-sm);
       transition: all var(--transition-base);
       overflow: hidden;
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+        opacity: 0;
+        transition: opacity var(--transition-base);
+      }
     }
 
     .card-hover:hover {
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+      border-color: var(--color-border-hover);
+      
+      &::before {
+        opacity: 1;
+      }
     }
 
     .card-clickable {
@@ -85,9 +103,6 @@ export class CardComponent {
   @Input() clickable = false;
   @Input() compact = false;
   @Input() bordered = false;
-
-  hasHeaderSlot = false;
-  hasFooterSlot = false;
 
   getCardClasses(): string {
     const classes = ['card'];

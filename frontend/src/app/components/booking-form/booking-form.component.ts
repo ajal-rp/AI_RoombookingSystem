@@ -83,7 +83,7 @@ export class BookingFormComponent implements OnInit, OnDestroy {
   initForm(): void {
     this.bookingForm = this.fb.group({
       roomId: ['', Validators.required],
-      date: ['', Validators.required],
+      date: ['', [Validators.required, this.futureDateValidator()]],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
       purpose: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
@@ -117,6 +117,23 @@ export class BookingFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  futureDateValidator() {
+    return (control: any) => {
+      if (!control.value) return null;
+      
+      const selectedDate = new Date(control.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        return { pastDate: true };
+      }
+      
+      return null;
+    };
   }
 
   validateTimes(): void {
@@ -289,7 +306,11 @@ export class BookingFormComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+    // Use local date to avoid timezone conversion issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   get duration(): string {
@@ -342,6 +363,7 @@ export class BookingFormComponent implements OnInit, OnDestroy {
     if (errors['min']) return `${this.getFieldLabel(fieldName)} must be at least ${errors['min'].min}`;
     if (errors['minDuration']) return 'Booking must be at least 30 minutes long';
     if (errors['maxDuration']) return 'Booking cannot exceed 8 hours';
+    if (errors['pastDate']) return 'Booking date must be today or in the future';
     
     return '';
   }

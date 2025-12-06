@@ -1,7 +1,10 @@
 <div class="calendar-container">
   <div class="calendar-header">
     <div class="header-left">
-      <h1>{{ viewMode === 'month' ? currentMonth + ' ' + currentYear : weekRange }}</h1>
+      <div class="header-title-row">
+        <app-back-button></app-back-button>
+        <h1>{{ viewMode === 'month' ? currentMonth + ' ' + currentYear : weekRange }}</h1>
+      </div>
       <div class="view-switcher">
         <button
           class="view-btn"

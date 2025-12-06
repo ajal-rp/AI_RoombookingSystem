@@ -25,11 +25,11 @@
       gap: var(--spacing-sm);
       font-size: 28px;
       font-weight: 700;
-      color: #111827;
+      color: var(--color-text-primary);
       margin: 0 0 var(--spacing-xs) 0;
       
       mat-icon {
-        color: #8b5cf6;
+        color: var(--color-primary);
         font-size: 32px;
         width: 32px;
         height: 32px;
@@ -38,7 +38,7 @@
     
     .subtitle {
       font-size: 14px;
-      color: #6b7280;
+      color: var(--color-text-secondary);
       margin: 0;
     }
   }
@@ -55,9 +55,9 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  background: white;
+  background: var(--color-surface);
   border-radius: var(--border-radius-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
   flex-shrink: 0;
   
@@ -68,17 +68,33 @@
   
   .filter-chip {
     padding: 8px 16px;
-    border-radius: var(--border-radius-full);
+    border-radius: var(--radius-full);
     border: 2px solid var(--color-border);
-    background: white;
+    background: var(--color-surface);
     color: var(--color-text-secondary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-base);
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--color-primary-light), var(--color-accent-light));
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    
+    > * {
+      position: relative;
+      z-index: 1;
+    }
     
     mat-icon {
       font-size: 18px;
@@ -92,7 +108,7 @@
     
     .chip-count {
       padding: 2px 8px;
-      border-radius: var(--border-radius-full);
+      border-radius: var(--radius-full);
       background: var(--color-surface-hover);
       font-size: 12px;
       font-weight: 600;
@@ -100,16 +116,23 @@
     
     &:hover {
       border-color: var(--color-primary);
-      background: var(--color-primary-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      
+      &::before {
+        opacity: 0.2;
+      }
     }
     
     &.active {
       border-color: var(--color-primary);
-      background: var(--color-primary);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
       color: white;
+      box-shadow: var(--shadow-md);
       
       .chip-count {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(8px);
       }
     }
   }
@@ -131,7 +154,7 @@
     padding: 8px 16px;
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-lg);
-    background: white;
+    background: var(--color-surface);
     min-width: 300px;
     
     mat-icon {
@@ -185,23 +208,27 @@
     .requests-table {
       width: 100%;
       background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
       th {
         background: #f9fafb;
-        color: #374151;
+        color: #6b7280;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.025em;
         padding: 16px 24px;
         border-bottom: 2px solid #e5e7eb;
       }
 
       td {
-        padding: 20px 24px;
-        color: #111827;
+        padding: 16px 24px;
+        color: #374151;
         font-size: 14px;
         border-bottom: 1px solid #f3f4f6;
+        vertical-align: middle;
 
         &.request-id {
           color: #8b5cf6;
@@ -322,9 +349,14 @@
 
       tr.mat-row {
         transition: background-color 0.2s ease;
+        height: 56px;
 
         &:hover {
           background-color: #f9fafb;
+        }
+
+        &:last-child td {
+          border-bottom: none;
         }
       }
 

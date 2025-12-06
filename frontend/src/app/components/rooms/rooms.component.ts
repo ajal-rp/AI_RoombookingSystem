@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { Router, RouterModule } from '@angular/router';
-import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
-import { BadgeComponent } from '../../shared/components/badge/badge.component';
-import { RoomService } from '../../services/room.service';
-import { AuthService } from '../../services/auth.service';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { MatIconModule } from "@angular/material/icon";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatSelectModule } from "@angular/material/select";
+import { MatInputModule } from "@angular/material/input";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatNativeDateModule } from "@angular/material/core";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
+import { Router, RouterModule } from "@angular/router";
+import { ButtonComponent } from "../../shared/components/button/button.component";
+import { CardComponent } from "../../shared/components/card/card.component";
+import { BadgeComponent } from "../../shared/components/badge/badge.component";
+import { BackButtonComponent } from "../../shared/components/back-button/back-button.component";
+import { RoomService } from "../../services/room.service";
+import { AuthService } from "../../services/auth.service";
 
 interface Room {
   id: number;
@@ -20,7 +22,7 @@ interface Room {
   location: string;
   capacity: number;
   amenities: string[];
-  status: 'Available' | 'Occupied' | 'Reserved';
+  status: "Available" | "Occupied" | "Reserved";
   imageUrl?: string;
   description?: string;
 }
@@ -36,7 +38,7 @@ interface RoomSchedule {
 }
 
 @Component({
-  selector: 'app-rooms',
+  selector: "app-rooms",
   standalone: true,
   imports: [
     CommonModule,
@@ -47,47 +49,50 @@ interface RoomSchedule {
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatSnackBarModule,
     RouterModule,
     ButtonComponent,
     CardComponent,
-    BadgeComponent
+    BadgeComponent,
+    BackButtonComponent,
   ],
-  templateUrl: './rooms.component.html',
-  styleUrls: ['./rooms.component.scss']
+  templateUrl: "./rooms.component.html",
+  styleUrls: ["./rooms.component.scss"],
 })
 export class RoomsComponent implements OnInit {
   loading = true;
   rooms: Room[] = [];
   filteredRooms: Room[] = [];
-  viewMode: 'grid' | 'list' = 'grid';
+  viewMode: "grid" | "list" = "grid";
 
   // Filters
-  searchQuery = '';
+  searchQuery = "";
   selectedDate: Date | null = null;
   minCapacity: number | null = null;
-  selectedStatus: string = 'all';
+  selectedStatus: string = "all";
   selectedAmenities: string[] = [];
 
   availableAmenities = [
-    'Projector',
-    'Whiteboard',
-    'Video Conference',
-    'Phone',
-    'TV'
+    "Projector",
+    "Whiteboard",
+    "Video Conference",
+    "Phone",
+    "TV",
   ];
 
   capacityOptions = [
-    { label: 'Any', value: null },
-    { label: '1-5 people', value: 5 },
-    { label: '6-10 people', value: 10 },
-    { label: '11-20 people', value: 20 },
-    { label: '20+ people', value: 21 }
+    { label: "Any", value: null },
+    { label: "1-5 people", value: 5 },
+    { label: "6-10 people", value: 10 },
+    { label: "11-20 people", value: 20 },
+    { label: "20+ people", value: 21 },
   ];
 
   constructor(
     private readonly roomService: RoomService,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -99,7 +104,7 @@ export class RoomsComponent implements OnInit {
   }
 
   addNewRoom(): void {
-    this.router.navigate(['/dashboard/rooms/add']);
+    this.router.navigate(["/dashboard/rooms/add"]);
   }
 
   loadRooms(): void {
@@ -109,68 +114,81 @@ export class RoomsComponent implements OnInit {
         this.rooms = rooms.map((room: any) => ({
           id: room.id,
           name: room.name,
-          location: room.location || 'No location specified',
+          location: room.location || "No location specified",
           capacity: room.capacity,
           amenities: room.amenities || this.getAmenitiesForRoom(room.id),
-          status: 'Available' as 'Available' | 'Occupied' | 'Reserved',
-          description: room.description || `A professional meeting space that can accommodate up to ${room.capacity} people.`
+          status: "Available" as "Available" | "Occupied" | "Reserved",
+          description:
+            room.description ||
+            `A professional meeting space that can accommodate up to ${room.capacity} people.`,
         }));
         this.filteredRooms = [...this.rooms];
         this.loading = false;
       },
       error: (error: any) => {
         this.loading = false;
-      }
+      },
     });
   }
 
   getAmenitiesForRoom(roomId: number): string[] {
     // Mock amenities based on room ID - in real app, this would come from backend
     const amenitiesMap: { [key: number]: string[] } = {
-      1: ['Projector', 'Whiteboard', 'Video Conference'],
-      2: ['TV', 'Whiteboard'],
-      3: ['Projector', 'Video Conference', 'Phone'],
+      1: ["Projector", "Whiteboard", "Video Conference"],
+      2: ["TV", "Whiteboard"],
+      3: ["Projector", "Video Conference", "Phone"],
     };
-    return amenitiesMap[roomId] || ['Whiteboard'];
+    return amenitiesMap[roomId] || ["Whiteboard"];
   }
 
   applyFilters(): void {
-    const searchLower = this.searchQuery?.toLowerCase() || '';
+    const searchLower = this.searchQuery?.toLowerCase() || "";
     const hasSearch = searchLower.length > 0;
 
-    this.filteredRooms = this.rooms.filter(room => 
-      this.matchesSearchFilter(room, hasSearch, searchLower) &&
-      this.matchesCapacityFilter(room) &&
-      this.matchesStatusFilter(room) &&
-      this.matchesAmenitiesFilter(room)
+    this.filteredRooms = this.rooms.filter(
+      (room) =>
+        this.matchesSearchFilter(room, hasSearch, searchLower) &&
+        this.matchesCapacityFilter(room) &&
+        this.matchesStatusFilter(room) &&
+        this.matchesAmenitiesFilter(room)
     );
   }
 
-  private matchesSearchFilter(room: any, hasSearch: boolean, searchLower: string): boolean {
+  private matchesSearchFilter(
+    room: any,
+    hasSearch: boolean,
+    searchLower: string
+  ): boolean {
     if (!hasSearch) return true;
-    return room.name.toLowerCase().includes(searchLower) ||
-           room.location.toLowerCase().includes(searchLower);
+    return (
+      room.name.toLowerCase().includes(searchLower) ||
+      room.location.toLowerCase().includes(searchLower)
+    );
   }
 
   private matchesCapacityFilter(room: any): boolean {
     if (this.minCapacity === null) return true;
-    return this.minCapacity === 21 ? room.capacity >= 21 : room.capacity >= this.minCapacity;
+    return this.minCapacity === 21
+      ? room.capacity >= 21
+      : room.capacity >= this.minCapacity;
   }
 
   private matchesStatusFilter(room: any): boolean {
-    return this.selectedStatus === 'all' || room.status === this.selectedStatus;
+    return this.selectedStatus === "all" || room.status === this.selectedStatus;
   }
 
   private matchesAmenitiesFilter(room: any): boolean {
     if (this.selectedAmenities.length === 0) return true;
-    return this.selectedAmenities.every(amenity => room.amenities.includes(amenity));
+    return this.selectedAmenities.every((amenity) =>
+      room.amenities.includes(amenity)
+    );
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
+    this.searchQuery = "";
     this.selectedDate = null;
     this.minCapacity = null;
-    this.selectedStatus = 'all';
+    this.selectedStatus = "all";
     this.selectedAmenities = [];
     this.applyFilters();
   }
@@ -185,32 +203,58 @@ export class RoomsComponent implements OnInit {
     this.applyFilters();
   }
 
-  getStatusVariant(status: string): 'success' | 'warning' | 'error' {
+  getStatusVariant(status: string): "success" | "warning" | "error" {
     switch (status) {
-      case 'Available': return 'success';
-      case 'Reserved': return 'warning';
-      case 'Occupied': return 'error';
-      default: return 'success';
+      case "Available":
+        return "success";
+      case "Reserved":
+        return "warning";
+      case "Occupied":
+        return "error";
+      default:
+        return "success";
     }
   }
 
   getAmenityIcon(amenity: string): string {
     const icons: { [key: string]: string } = {
-      'Projector': 'settings_input_hdmi',
-      'Whiteboard': 'border_color',
-      'Video Conference': 'videocam',
-      'Phone': 'phone',
-      'TV': 'tv'
+      Projector: "settings_input_hdmi",
+      Whiteboard: "border_color",
+      "Video Conference": "videocam",
+      Phone: "phone",
+      TV: "tv",
     };
-    return icons[amenity] || 'check_circle';
+    return icons[amenity] || "check_circle";
   }
 
-  setViewMode(mode: 'grid' | 'list'): void {
+  setViewMode(mode: "grid" | "list"): void {
     this.viewMode = mode;
   }
-
   toggleFilters(): void {
     // Placeholder method for filter panel toggle
     // Can be expanded to show/hide filter panel on mobile
+  }
+
+  deleteRoom(roomId: number): void {
+    if (
+      !confirm(
+        "Are you sure you want to delete this room? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    this.roomService.deleteRoom(roomId).subscribe({
+      next: () => {
+        this.snackBar.open("Room deleted successfully", "Close", {
+          duration: 3000,
+        });
+        this.loadRooms(); // Reload the rooms list
+      },
+      error: (error: any) => {
+        const errorMessage = error.message || "Failed to delete room";
+        this.snackBar.open(errorMessage, "Close", { duration: 5000 });
+      },
+    });
   }
 }

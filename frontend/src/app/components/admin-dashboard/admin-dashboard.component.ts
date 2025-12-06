@@ -120,19 +120,65 @@ import { RejectDialogComponent } from "../reject-dialog/reject-dialog.component"
         padding: 20px;
       }
 
+      .spacer {
+        flex: 1 1 auto;
+      }
+
       table {
         width: 100%;
+        min-width: 600px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      table th {
+        background: #f9fafb;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        padding: 16px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      table td {
+        padding: 16px;
+        color: #374151;
+        font-size: 14px;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: middle;
+      }
+
+      table tr {
+        transition: background-color 0.2s ease;
+        height: 56px;
+      }
+
+      table tbody tr:hover {
+        background-color: #f9fafb;
+      }
+
+      table tbody tr:last-child td {
+        border-bottom: none;
       }
 
       .no-data {
         text-align: center;
-        padding: 40px;
-        color: #999;
-        font-size: 16px;
+        padding: 60px 20px;
+        color: #9ca3af;
+        font-size: 14px;
       }
 
       .action-btn {
         margin-right: 8px;
+        margin-bottom: 4px;
+      }
+
+      mat-card {
+        margin-bottom: 20px;
       }
 
       mat-card-header {
@@ -140,10 +186,110 @@ import { RejectDialogComponent } from "../reject-dialog/reject-dialog.component"
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      mat-card-title {
+        margin-bottom: 8px;
       }
 
       mat-card-content {
         overflow-x: auto;
+      }
+
+      mat-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      /* Mobile (portrait phones, less than 576px) */
+      @media (max-width: 575px) {
+        .container {
+          padding: 12px;
+        }
+
+        mat-card {
+          padding: 8px;
+        }
+
+        mat-card-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        mat-card-title {
+          font-size: 1.1rem;
+        }
+
+        .action-btn {
+          font-size: 0.85rem;
+          padding: 4px 8px;
+          margin-right: 4px;
+        }
+
+        mat-toolbar {
+          font-size: 0.9rem;
+          padding: 0 8px;
+        }
+
+        mat-toolbar span:first-child {
+          font-size: 1rem;
+        }
+
+        table {
+          font-size: 0.85rem;
+        }
+
+        th, td {
+          padding: 8px 4px;
+        }
+      }
+
+      /* Small tablets (landscape phones, 576px and up) */
+      @media (min-width: 576px) and (max-width: 767px) {
+        .container {
+          padding: 16px;
+        }
+
+        .action-btn {
+          font-size: 0.9rem;
+        }
+
+        table {
+          font-size: 0.9rem;
+        }
+      }
+
+      /* Tablets (768px and up) */
+      @media (min-width: 768px) and (max-width: 991px) {
+        .container {
+          padding: 20px;
+        }
+
+        mat-card {
+          padding: 16px;
+        }
+      }
+
+      /* Large devices (desktops, 992px and up) */
+      @media (min-width: 992px) {
+        .container {
+          padding: 24px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        mat-card {
+          padding: 20px;
+        }
+      }
+
+      /* Extra large devices (large desktops, 1200px and up) */
+      @media (min-width: 1200px) {
+        .container {
+          max-width: 1600px;
+        }
       }
     `,
   ],

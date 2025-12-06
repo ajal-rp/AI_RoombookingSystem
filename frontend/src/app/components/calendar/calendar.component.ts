@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
+import { BackButtonComponent } from '../../shared/components/back-button/back-button.component';
 import { BookingService } from '../../services/booking.service';
 import { BookingRequest } from '../../models/booking.model';
 
@@ -35,7 +36,8 @@ interface WeekDay {
     MatTooltipModule,
     ButtonComponent, 
     CardComponent, 
-    BadgeComponent
+    BadgeComponent,
+    BackButtonComponent
   ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']

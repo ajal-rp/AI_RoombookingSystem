@@ -7,111 +7,112 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatIconModule],
   template: `
-    <div class="kpi-card" [class.loading]="loading">
-      <div class="kpi-icon" [style.background]="iconBackground">
-        <mat-icon>{{ icon }}</mat-icon>
-      </div>
-      <div class="kpi-content">
+    <div class="kpi-card" [class.loading]="loading" [style.background]="gradientBackground">
+      <div class="kpi-header">
         <div class="kpi-label">{{ label }}</div>
-        <div class="kpi-value">
-          <span *ngIf="!loading">{{ value }}</span>
-          <div *ngIf="loading" class="skeleton"></div>
-        </div>
-        <div *ngIf="change !== undefined" class="kpi-change" [class.positive]="change > 0" [class.negative]="change < 0">
-          <mat-icon>{{ change > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
-          <span>{{ Math.abs(change) }}%</span>
-        </div>
+        <mat-icon class="kpi-card-icon">{{ icon }}</mat-icon>
+      </div>
+      <div class="kpi-value">
+        <span *ngIf="!loading">{{ value }}</span>
+        <div *ngIf="loading" class="skeleton"></div>
+      </div>
+      <div *ngIf="change !== undefined" class="kpi-change" [class.positive]="change > 0" [class.negative]="change < 0">
+        <span>{{ change > 0 ? 'Increased' : 'Decreased' }} by {{ Math.abs(change) }}%</span>
       </div>
     </div>
   `,
   styles: [`
     .kpi-card {
       display: flex;
-      gap: var(--spacing-lg);
-      padding: var(--spacing-xl);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      flex-direction: column;
+      justify-content: space-between;
+      padding: var(--spacing-2xl);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
       transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      color: white;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+      }
 
       &:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-2xl);
+      }
+      
+      > * {
+        position: relative;
+        z-index: 1;
       }
     }
 
-    .kpi-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
+    .kpi-header {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-        color: white;
-      }
-    }
-
-    .kpi-content {
-      flex: 1;
-      min-width: 0;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-lg);
     }
 
     .kpi-label {
-      font-size: var(--font-size-sm);
-      color: var(--color-text-secondary);
+      font-size: var(--font-size-base);
       font-weight: var(--font-weight-medium);
-      margin-bottom: var(--spacing-xs);
+      color: rgba(255, 255, 255, 0.95);
+      line-height: 1.4;
+    }
+
+    .kpi-card-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .kpi-value {
-      font-size: var(--font-size-3xl);
+      font-size: var(--font-size-4xl);
       font-weight: var(--font-weight-bold);
-      color: var(--color-text-primary);
+      color: white;
       line-height: 1.2;
-      margin-bottom: var(--spacing-xs);
+      margin-bottom: var(--spacing-md);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
       .skeleton {
-        width: 80px;
-        height: 36px;
-        background: linear-gradient(90deg, var(--color-background) 0%, var(--color-border) 50%, var(--color-background) 100%);
-        background-size: 200% 100%;
+        width: 120px;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.2);
         animation: shimmer 1.5s infinite;
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-md);
       }
     }
 
     .kpi-change {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: var(--font-size-xs);
+      gap: var(--spacing-xs);
+      font-size: var(--font-size-sm);
       font-weight: var(--font-weight-medium);
-
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
-
-      &.positive {
-        color: var(--color-success);
-      }
-
-      &.negative {
-        color: var(--color-error);
-      }
+      color: rgba(255, 255, 255, 0.9);
+      padding: var(--spacing-xs) var(--spacing-md);
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-full);
+      backdrop-filter: blur(8px);
     }
 
     @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
     }
   `]
 })
@@ -120,6 +121,7 @@ export class KpiCardComponent {
   @Input() value!: string | number;
   @Input() icon!: string;
   @Input() iconBackground = 'var(--color-primary)';
+  @Input() gradientBackground = 'linear-gradient(135deg, #FE9496 0%, #FFA07A 100%)';
   @Input() change?: number;
   @Input() loading = false;
 

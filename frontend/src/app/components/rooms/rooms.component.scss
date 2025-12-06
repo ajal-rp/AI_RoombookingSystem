@@ -16,6 +16,13 @@
   gap: var(--spacing-lg);
   flex-shrink: 0;
 
+  .header-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+  }
+
   h1 {
     margin: 0;
     font-size: var(--font-size-3xl);
@@ -46,11 +53,14 @@
 // Filters Panel
 .filters-panel {
   background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
   height: 100%;
   overflow-y: auto;
+  box-shadow: var(--shadow-md);
   
   // Custom scrollbar styling
   &::-webkit-scrollbar {
@@ -107,30 +117,54 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   font-family: var(--font-family);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-accent-light));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
 
   mat-icon {
     font-size: 16px;
     width: 16px;
     height: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  span {
+    position: relative;
+    z-index: 1;
   }
 
   &:hover {
     border-color: var(--color-primary);
-    color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    
+    &::before {
+      opacity: 0.3;
+    }
   }
 
   &.selected {
-    background: var(--color-primary-light);
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-accent-light));
     border-color: var(--color-primary);
     color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
 
     mat-icon {
       color: var(--color-primary);
@@ -216,6 +250,7 @@
   gap: var(--spacing-lg);
   overflow-y: auto;
   padding-right: var(--spacing-xs);
+  grid-auto-rows: max-content;
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -241,6 +276,9 @@
     .room-card {
       flex-direction: row;
       align-items: stretch;
+      height: 220px;
+      min-height: 220px;
+      max-height: 220px;
       
       ::ng-deep .card {
         display: flex;
@@ -343,6 +381,27 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: auto;
+  min-height: 450px;
+
+  ::ng-deep .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  ::ng-deep .card-body {
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  ::ng-deep .card-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+  }
 }
 
 .room-image {
@@ -351,6 +410,7 @@
   height: 200px;
   overflow: hidden;
   background: var(--color-background);
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -375,6 +435,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding: var(--spacing-xl);
 }
 
 .room-header {
@@ -469,8 +530,6 @@
 .room-footer {
   display: flex;
   gap: var(--spacing-sm);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border);
 
   app-button:first-child {
     flex: 1;
@@ -534,6 +593,10 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 
     &.list-view .room-card {
+      height: 200px;
+      min-height: 200px;
+      max-height: 200px;
+
       .room-image {
         width: 200px;
         min-width: 200px;
@@ -578,6 +641,10 @@
   }
 
   .rooms-grid.list-view .room-card {
+    height: auto;
+    min-height: 420px;
+    max-height: none;
+
     ::ng-deep .card {
       flex-direction: column;
     }

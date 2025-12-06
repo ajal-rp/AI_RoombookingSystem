@@ -12,6 +12,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Amenities, opt => opt.MapFrom(src => 
                 !string.IsNullOrWhiteSpace(src.Amenities) 
                     ? src.Amenities.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).ToList()
+                    : new List<string>()))
+            .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => 
+                !string.IsNullOrWhiteSpace(src.ImageUrls) 
+                    ? src.ImageUrls.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(a => a.Trim()).ToList()
                     : new List<string>()));
                     
         CreateMap<BookingRequest, BookingRequestDto>()

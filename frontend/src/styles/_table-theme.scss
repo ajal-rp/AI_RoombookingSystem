@@ -3,19 +3,19 @@
   width: 100%;
   overflow-x: auto;
   border-radius: 12px;
-  background: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  background: white;
+  background: var(--color-surface);
 
   thead {
-    background-color: #f9fafb;
-    border-bottom: 2px solid #e5e7eb;
+    background-color: var(--color-background);
+    border-bottom: 2px solid var(--color-border);
 
     tr {
       th {
@@ -23,11 +23,11 @@
         text-align: left;
         font-weight: 600;
         font-size: 12px;
-        color: #6b7280;
+        color: var(--color-text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.025em;
         white-space: nowrap;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--color-border);
 
         &:first-child {
           padding-left: 24px;
@@ -42,11 +42,11 @@
 
   tbody {
     tr {
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--color-border-light);
       transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: #f9fafb;
+        background-color: var(--color-surface-hover);
       }
 
       &:last-child {
@@ -55,7 +55,7 @@
 
       td {
         padding: 16px;
-        color: #374151;
+        color: var(--color-text-primary);
         vertical-align: middle;
 
         &:first-child {
@@ -111,7 +111,7 @@
       font-size: 20px;
       width: 20px;
       height: 20px;
-      color: #8b5cf6;
+      color: var(--color-primary);
     }
   }
 
@@ -126,7 +126,7 @@
       font-size: 18px;
       width: 18px;
       height: 18px;
-      color: #6b7280;
+      color: var(--color-text-secondary);
     }
   }
 
@@ -197,22 +197,22 @@
 // Material table styling (for admin dashboard)
 .mat-mdc-table {
   width: 100%;
-  background: white;
+  background: var(--color-surface);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 
   .mat-mdc-header-row {
-    background-color: #f9fafb;
+    background-color: var(--color-background);
     height: 56px;
 
     .mat-mdc-header-cell {
       font-weight: 600;
       font-size: 12px;
-      color: #6b7280;
+      color: var(--color-text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.025em;
-      border-bottom: 2px solid #e5e7eb;
+      border-bottom: 2px solid var(--color-border);
       padding: 0 16px;
     }
   }
@@ -222,14 +222,14 @@
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: #f9fafb;
+      background-color: var(--color-surface-hover);
     }
 
     .mat-mdc-cell {
-      color: #374151;
+      color: var(--color-text-primary);
       font-size: 14px;
       padding: 0 16px;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--color-border-light);
     }
 
     &:last-child .mat-mdc-cell {
@@ -246,7 +246,7 @@
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  color: #9ca3af;
+  color: var(--color-text-tertiary);
 
   mat-icon {
     font-size: 64px;

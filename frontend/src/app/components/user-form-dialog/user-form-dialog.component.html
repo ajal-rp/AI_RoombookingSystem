@@ -1,0 +1,98 @@
+<div class="user-form-dialog">
+  <div class="dialog-header">
+    <h2>
+      <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+      {{ isEditMode ? 'Edit User' : 'Add New User' }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <div class="dialog-content">
+      <!-- First Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>First Name</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="firstName" placeholder="Enter first name">
+        <mat-error *ngIf="userForm.get('firstName')?.invalid">
+          {{ getFieldError('firstName') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Middle Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Middle Name (Optional)</mat-label>
+        <mat-icon matPrefix>person_outline</mat-icon>
+        <input matInput formControlName="middleName" placeholder="Enter middle name">
+      </mat-form-field>
+
+      <!-- Last Name -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Last Name</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="lastName" placeholder="Enter last name">
+        <mat-error *ngIf="userForm.get('lastName')?.invalid">
+          {{ getFieldError('lastName') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Email -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email" placeholder="Enter email address">
+        <mat-error *ngIf="userForm.get('email')?.invalid">
+          {{ getFieldError('email') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Username -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Username</mat-label>
+        <mat-icon matPrefix>account_circle</mat-icon>
+        <input matInput formControlName="username" placeholder="Enter username">
+        <mat-hint *ngIf="isEditMode">Username cannot be changed</mat-hint>
+        <mat-error *ngIf="userForm.get('username')?.invalid">
+          {{ getFieldError('username') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password (only for new users) -->
+      <mat-form-field appearance="outline" class="full-width" *ngIf="!isEditMode">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput type="password" formControlName="password" placeholder="Enter password">
+        <mat-hint>Minimum 6 characters</mat-hint>
+        <mat-error *ngIf="userForm.get('password')?.invalid">
+          {{ getFieldError('password') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Role -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Role</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let role of roles" [value]="role.value">
+            {{ role.label }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="isEditMode">Role cannot be changed</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="dialog-actions">
+      <app-button variant="outline" type="button" (clicked)="onCancel()">
+        Cancel
+      </app-button>
+      <app-button 
+        variant="primary" 
+        type="submit" 
+        [disabled]="userForm.invalid">
+        {{ isEditMode ? 'Update User' : 'Create User' }}
+      </app-button>
+    </div>
+  </form>
+</div>

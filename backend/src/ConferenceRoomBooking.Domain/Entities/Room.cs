@@ -11,6 +11,7 @@ public class Room
     public int Capacity { get; set; }
     public string? Description { get; set; }
     public string? Amenities { get; set; } // Stored as comma-separated values
+    public string? ImageUrls { get; set; } // Stored as comma-separated values (optional)
     
     // Navigation property
     public ICollection<BookingRequest> BookingRequests { get; set; } = new List<BookingRequest>();

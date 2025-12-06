@@ -3,6 +3,7 @@
   <div class="page-header">
     <div class="header-content">
       <h1>
+        <app-back-button></app-back-button>
         <mat-icon>event</mat-icon>
         {{ isAdmin ? 'Booking Requests' : 'My Bookings' }}
       </h1>
@@ -95,7 +96,7 @@
         <!-- Date Column -->
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-          <td mat-cell *matCellDef="let request">{{ formatDate(request.startTime) }}</td>
+          <td mat-cell *matCellDef="let request">{{ formatDate(request.date) }}</td>
         </ng-container>
 
         <!-- Time Column -->

@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -9,9 +10,10 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 @Component({
   selector: 'app-button',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule, MatIconModule, MatProgressSpinnerModule],
   template: `
     <button
+      *ngIf="!routerLink"
       [type]="type"
       [disabled]="disabled || loading"
       [class]="getButtonClasses()"
@@ -21,14 +23,26 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
         [diameter]="getSpinnerSize()"
         class="button-spinner">
       </mat-spinner>
-      <mat-icon *ngIf="icon && !loading" [class.icon-only]="!hasContent">{{ icon }}</mat-icon>
-      <span *ngIf="hasContent" class="button-content">
-        <ng-content></ng-content>
-      </span>
+      <mat-icon *ngIf="icon && !loading">{{ icon }}</mat-icon>
+      <ng-content></ng-content>
     </button>
+    
+    <a
+      *ngIf="routerLink"
+      [routerLink]="routerLink"
+      [class]="'router-button ' + getButtonClasses()"
+      [class.disabled]="disabled || loading">
+      <mat-spinner
+        *ngIf="loading"
+        [diameter]="getSpinnerSize()"
+        class="button-spinner">
+      </mat-spinner>
+      <mat-icon *ngIf="icon && !loading">{{ icon }}</mat-icon>
+      <ng-content></ng-content>
+    </a>
   `,
   styles: [`
-    button {
+    button, .router-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -42,19 +56,17 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       transition: all var(--transition-fast);
       white-space: nowrap;
       position: relative;
+      text-decoration: none;
 
       &:focus-visible {
         outline: 2px solid var(--color-primary);
         outline-offset: 2px;
       }
 
-      &:disabled {
+      &:disabled, &.disabled {
         opacity: 0.5;
         cursor: not-allowed;
-      }
-
-      .icon-only {
-        margin: 0;
+        pointer-events: none;
       }
 
       .button-spinner {
@@ -65,7 +77,6 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       }
 
       &:has(.button-spinner) {
-        .button-content,
         mat-icon {
           opacity: 0;
         }
@@ -111,17 +122,36 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 
     // Variants
     .btn-primary {
-      background: var(--color-primary);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
       color: white;
-
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+        opacity: 0;
+        transition: opacity var(--transition-base);
+      }
+      
       &:hover:not(:disabled) {
-        background: var(--color-primary-hover);
-        box-shadow: var(--shadow-md);
-        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+        
+        &::before {
+          opacity: 1;
+        }
       }
 
       &:active:not(:disabled) {
         transform: translateY(0);
+      }
+      
+      > * {
+        position: relative;
+        z-index: 1;
       }
     }
 
@@ -183,14 +213,8 @@ export class ButtonComponent {
   @Input() loading = false;
   @Input() icon?: string;
   @Input() fullWidth = false;
+  @Input() routerLink?: string | any[];
   @Output() clicked = new EventEmitter<MouseEvent>();
-
-  hasContent = true;
-
-  ngAfterContentInit() {
-    // Check if button has content
-    this.hasContent = true;
-  }
 
   getButtonClasses(): string {
     const classes = [

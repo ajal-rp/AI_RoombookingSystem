@@ -3,6 +3,7 @@
   <div class="page-header">
     <div class="header-content">
       <h1>
+        <app-back-button></app-back-button>
         <mat-icon>event_available</mat-icon>
         Room Schedule & Availability
       </h1>
@@ -18,31 +19,20 @@
 
   <!-- Legend -->
   <div class="status-legend">
-    <mat-card>
-      <div class="legend-items">
-        <div class="legend-item">
-          <mat-chip class="status-chip available">
-            <mat-icon>check_circle</mat-icon>
-            Available
-          </mat-chip>
-          <span>Ready to book</span>
-        </div>
-        <div class="legend-item">
-          <mat-chip class="status-chip occupied">
-            <mat-icon>cancel</mat-icon>
-            Occupied
-          </mat-chip>
-          <span>Currently in use</span>
-        </div>
-        <div class="legend-item">
-          <mat-chip class="status-chip reserved">
-            <mat-icon>schedule</mat-icon>
-            Reserved
-          </mat-chip>
-          <span>Upcoming bookings</span>
-        </div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="status-badge status-available">Available</span>
+        <span class="legend-text">Ready to book</span>
       </div>
-    </mat-card>
+      <div class="legend-item">
+        <span class="status-badge status-occupied">Occupied</span>
+        <span class="legend-text">Currently in use</span>
+      </div>
+      <div class="legend-item">
+        <span class="status-badge status-reserved">Reserved</span>
+        <span class="legend-text">Upcoming bookings</span>
+      </div>
+    </div>
   </div>
 
   <!-- Table -->
@@ -125,7 +115,8 @@
           <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
             <div class="no-data-message">
               <mat-icon>meeting_room</mat-icon>
-              <p>No rooms found</p>
+              <h3>No Rooms Found</h3>
+              <p>There are no rooms to display</p>
             </div>
           </td>
         </tr>

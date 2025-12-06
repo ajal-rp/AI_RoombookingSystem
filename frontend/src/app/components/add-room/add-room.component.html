@@ -1,136 +1,291 @@
 <div class="add-room-container">
-  <mat-card class="room-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>meeting_room</mat-icon>
-        Add New Room
-      </mat-card-title>
-    </mat-card-header>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <app-back-button></app-back-button>
+      <div class="header-content">
+        <h1>
+          <mat-icon>{{ isEditMode ? 'edit' : 'add_business' }}</mat-icon>
+          {{ isEditMode ? 'Edit Room' : 'Add New Room' }}
+        </h1>
+        <p class="subtitle">{{ isEditMode ? 'Update room details and settings' : 'Create a new conference room with details' }}</p>
+      </div>
+    </div>
+  </div>
 
-    <mat-card-content>
-      <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
-        <div class="form-grid">
-          <!-- Room Name -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Room Name</mat-label>
-            <input 
-              matInput 
-              formControlName="name" 
-              placeholder="e.g., Conference Room A"
-              required>
-            <mat-icon matPrefix>label</mat-icon>
-            <mat-error *ngIf="roomForm.get('name')?.hasError('required')">
-              Room name is required
-            </mat-error>
-            <mat-error *ngIf="roomForm.get('name')?.hasError('maxlength')">
-              Maximum 100 characters allowed
-            </mat-error>
-          </mat-form-field>
+  <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+    <div class="form-layout">
+      <!-- Left Column: Basic Details -->
+      <div class="form-column">
+        <app-card>
+          <div class="card-section">
+            <h2 class="section-title">
+              <mat-icon>info</mat-icon>
+              Basic Information
+            </h2>
 
-          <!-- Location -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Location</mat-label>
-            <input 
-              matInput 
-              formControlName="location" 
-              placeholder="e.g., Building A, 3rd Floor"
-              required>
-            <mat-icon matPrefix>location_on</mat-icon>
-            <mat-error *ngIf="roomForm.get('location')?.hasError('required')">
-              Location is required
-            </mat-error>
-            <mat-error *ngIf="roomForm.get('location')?.hasError('maxlength')">
-              Maximum 200 characters allowed
-            </mat-error>
-          </mat-form-field>
+            <!-- Room Name -->
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>label</mat-icon>
+                Room Name *
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="name"
+                  placeholder="e.g., Executive Board Room">
+                <mat-icon class="input-icon">meeting_room</mat-icon>
+              </div>
+              <div class="form-error" *ngIf="roomForm.get('name')?.touched && roomForm.get('name')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('name') }}
+              </div>
+              <div class="form-hint" *ngIf="!roomForm.get('name')?.touched">
+                Choose a descriptive name for the room (3-100 characters)
+              </div>
+            </div>
 
-          <!-- Capacity -->
-          <mat-form-field appearance="outline">
-            <mat-label>Capacity</mat-label>
-            <input 
-              matInput 
-              type="number" 
-              formControlName="capacity" 
-              placeholder="Number of people"
-              required>
-            <mat-icon matPrefix>people</mat-icon>
-            <mat-error *ngIf="roomForm.get('capacity')?.hasError('required')">
-              Capacity is required
-            </mat-error>
-            <mat-error *ngIf="roomForm.get('capacity')?.hasError('min')">
-              Minimum capacity is 1
-            </mat-error>
-            <mat-error *ngIf="roomForm.get('capacity')?.hasError('max')">
-              Maximum capacity is 1000
-            </mat-error>
-          </mat-form-field>
+            <!-- Location -->
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>location_on</mat-icon>
+                Location *
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="location"
+                  placeholder="e.g., 5th Floor, Building A">
+                <mat-icon class="input-icon">place</mat-icon>
+              </div>
+              <div class="form-error" *ngIf="roomForm.get('location')?.touched && roomForm.get('location')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('location') }}
+              </div>
+              <div class="form-hint" *ngIf="!roomForm.get('location')?.touched">
+                Specify the floor and building location
+              </div>
+            </div>
 
-          <!-- Description -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea 
-              matInput 
-              formControlName="description" 
-              rows="3"
-              placeholder="Room description (optional)"></textarea>
-            <mat-icon matPrefix>description</mat-icon>
-            <mat-error *ngIf="roomForm.get('description')?.hasError('maxlength')">
-              Maximum 500 characters allowed
-            </mat-error>
-          </mat-form-field>
+            <!-- Capacity -->
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>group</mat-icon>
+                Capacity *
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="capacity"
+                  placeholder="Number of people"
+                  min="1"
+                  max="1000">
+                <mat-icon class="input-icon">people</mat-icon>
+              </div>
+              <div class="form-error" *ngIf="roomForm.get('capacity')?.touched && roomForm.get('capacity')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('capacity') }}
+              </div>
+              <div class="form-hint" *ngIf="!roomForm.get('capacity')?.touched">
+                Maximum number of people the room can accommodate
+              </div>
+            </div>
 
-          <!-- Amenities -->
-          <div class="full-width amenities-section">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Add Amenities</mat-label>
-              <input 
-                matInput 
-                formControlName="amenityInput" 
-                placeholder="e.g., Projector, Whiteboard"
-                (keyup.enter)="addAmenity()">
-              <mat-icon matPrefix>devices</mat-icon>
-              <button 
-                mat-icon-button 
-                matSuffix 
-                type="button"
-                (click)="addAmenity()"
-                [disabled]="!roomForm.get('amenityInput')?.value">
-                <mat-icon>add</mat-icon>
-              </button>
-            </mat-form-field>
-
-            <mat-chip-set *ngIf="amenities.length > 0" class="amenity-chips">
-              <mat-chip 
-                *ngFor="let amenity of amenities"
-                (removed)="removeAmenity(amenity)">
-                {{amenity}}
-                <button matChipRemove>
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-chip>
-            </mat-chip-set>
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label">
+                <mat-icon>description</mat-icon>
+                Description
+              </label>
+              <div class="input-wrapper">
+                <textarea
+                  class="form-control"
+                  formControlName="description"
+                  rows="4"
+                  placeholder="Provide additional details about the room (optional)"></textarea>
+              </div>
+              <div class="form-error" *ngIf="roomForm.get('description')?.touched && roomForm.get('description')?.invalid">
+                <mat-icon>error</mat-icon>
+                {{ getFieldError('description') }}
+              </div>
+              <div class="form-hint" *ngIf="!roomForm.get('description')?.touched">
+                Optional: Add any special features or notes (max 500 characters)
+              </div>
+            </div>
           </div>
-        </div>
+        </app-card>
 
-        <!-- Action Buttons -->
-        <div class="form-actions">
-          <button 
-            mat-raised-button 
-            type="button"
-            (click)="cancel()"
-            [disabled]="isSubmitting">
-            Cancel
-          </button>
-          <button 
-            mat-raised-button 
-            color="primary" 
-            type="submit"
-            [disabled]="roomForm.invalid || isSubmitting">
-            <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-            <span *ngIf="!isSubmitting">Create Room</span>
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+        <!-- Amenities Card -->
+        <app-card>
+          <div class="card-section">
+            <h2 class="section-title">
+              <mat-icon>devices</mat-icon>
+              Available Amenities
+            </h2>
+            <p class="section-description">Select all amenities available in this room</p>
+            
+            <div class="amenities-grid">
+              <button
+                *ngFor="let amenity of availableAmenities"
+                type="button"
+                class="amenity-chip"
+                [class.selected]="selectedAmenities.includes(amenity)"
+                (click)="toggleAmenity(amenity)"
+                [matTooltip]="amenity">
+                <mat-icon>{{ getAmenityIcon(amenity) }}</mat-icon>
+                <span>{{ amenity }}</span>
+                <mat-icon class="check-icon" *ngIf="selectedAmenities.includes(amenity)">check_circle</mat-icon>
+              </button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Column: Images -->
+      <div class="form-column">
+        <app-card>
+          <div class="card-section">
+            <h2 class="section-title">
+              <mat-icon>image</mat-icon>
+              Room Images
+            </h2>
+            <p class="section-description">Upload images or provide image URLs</p>
+
+            <!-- Upload from Computer -->
+            <div class="upload-section">
+              <h3 class="upload-title">
+                <mat-icon>cloud_upload</mat-icon>
+                Upload from Computer
+              </h3>
+              
+              <label class="upload-area" for="fileInput">
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept="image/*"
+                  multiple
+                  (change)="onFileSelected($event)"
+                  style="display: none;">
+                <div class="upload-content">
+                  <mat-icon>add_photo_alternate</mat-icon>
+                  <p class="upload-text">Click to browse or drag and drop images here</p>
+                  <p class="upload-hint">PNG, JPG, GIF, WebP up to 5MB each</p>
+                </div>
+              </label>
+
+              <!-- Image Previews -->
+              <div class="image-previews" *ngIf="imagePreviewUrls.length > 0">
+                <div class="preview-item" *ngFor="let url of imagePreviewUrls; let i = index">
+                  <img [src]="url" alt="Preview">
+                  <button type="button" class="remove-btn" (click)="removeUploadedImage(i)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider">
+              <span>OR</span>
+            </div>
+
+            <!-- Image URLs -->
+            <div class="url-section">
+              <h3 class="upload-title">
+                <mat-icon>link</mat-icon>
+                Add Image URLs
+              </h3>
+
+              <div class="image-url-list">
+                <div *ngFor="let control of imageUrlControls.controls; let i = index" class="url-input-row">
+                  <div class="input-wrapper">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [formControl]="$any(control)"
+                      placeholder="https://example.com/image.jpg">
+                    <mat-icon class="input-icon">link</mat-icon>
+                  </div>
+                  <button type="button" class="remove-url-btn" (click)="removeImageUrl(i)" matTooltip="Remove URL">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <app-button
+                variant="outline"
+                icon="add"
+                size="sm"
+                (clicked)="addImageUrl()"
+                type="button">
+                Add Image URL
+              </app-button>
+
+              <div class="info-box">
+                <mat-icon>info</mat-icon>
+                <p>You can add multiple image URLs. Make sure URLs are publicly accessible.</p>
+              </div>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Preview Summary -->
+        <app-card *ngIf="roomForm.get('name')?.value || selectedAmenities.length > 0">
+          <div class="card-section preview-section">
+            <h2 class="section-title">
+              <mat-icon>preview</mat-icon>
+              Preview
+            </h2>
+
+            <div class="preview-content">
+              <div class="preview-item" *ngIf="roomForm.get('name')?.value">
+                <span class="preview-label">Room Name:</span>
+                <span class="preview-value">{{ roomForm.get('name')?.value }}</span>
+              </div>
+              <div class="preview-item" *ngIf="roomForm.get('location')?.value">
+                <span class="preview-label">Location:</span>
+                <span class="preview-value">{{ roomForm.get('location')?.value }}</span>
+              </div>
+              <div class="preview-item" *ngIf="roomForm.get('capacity')?.value">
+                <span class="preview-label">Capacity:</span>
+                <span class="preview-value">{{ roomForm.get('capacity')?.value }} people</span>
+              </div>
+              <div class="preview-item" *ngIf="selectedAmenities.length > 0">
+                <span class="preview-label">Amenities:</span>
+                <span class="preview-value">{{ selectedAmenities.length }} selected</span>
+              </div>
+              <div class="preview-item" *ngIf="imagePreviewUrls.length > 0 || imageUrlControls.length > 0">
+                <span class="preview-label">Images:</span>
+                <span class="preview-value">{{ imagePreviewUrls.length + imageUrlControls.length }} added</span>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <app-button
+        variant="outline"
+        size="lg"
+        (clicked)="onCancel()"
+        [disabled]="saving"
+        type="button">
+        Cancel
+      </app-button>
+      <app-button
+        variant="primary"
+        size="lg"
+        type="submit"
+        [disabled]="roomForm.invalid || saving"
+        [loading]="saving">
+        <span *ngIf="uploadingImage">Uploading Images...</span>
+        <span *ngIf="!uploadingImage">{{ isEditMode ? 'Update Room' : 'Create Room' }}</span>
+      </app-button>
+    </div>
+  </form>
 </div>

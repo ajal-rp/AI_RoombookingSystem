@@ -1,14 +1,14 @@
 using ConferenceRoomBooking.Application.DTOs;
 using ConferenceRoomBooking.Application.Interfaces;
-using ConferenceRoomBooking.Domain.Entities;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.Application.Features.Rooms.Commands;
 
-public record CreateRoomCommand : IRequest<RoomDto>
+public record UpdateRoomCommand : IRequest<RoomDto>
 {
+    public int Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Location { get; init; } = string.Empty;
     public int Capacity { get; init; }
@@ -17,10 +17,13 @@ public record CreateRoomCommand : IRequest<RoomDto>
     public List<string>? ImageUrls { get; init; }
 }
 
-public class CreateRoomCommandValidator : AbstractValidator<CreateRoomCommand>
+public class UpdateRoomCommandValidator : AbstractValidator<UpdateRoomCommand>
 {
-    public CreateRoomCommandValidator()
+    public UpdateRoomCommandValidator()
     {
+        RuleFor(x => x.Id)
+            .GreaterThan(0).WithMessage("Room ID is required");
+
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Room name is required")
             .MaximumLength(100).WithMessage("Room name cannot exceed 100 characters");
@@ -39,37 +42,41 @@ public class CreateRoomCommandValidator : AbstractValidator<CreateRoomCommand>
     }
 }
 
-public class CreateRoomCommandHandler : IRequestHandler<CreateRoomCommand, RoomDto>
+public class UpdateRoomCommandHandler : IRequestHandler<UpdateRoomCommand, RoomDto>
 {
     private readonly IApplicationDbContext _context;
 
-    public CreateRoomCommandHandler(IApplicationDbContext context)
+    public UpdateRoomCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<RoomDto> Handle(CreateRoomCommand request, CancellationToken cancellationToken)
+    public async Task<RoomDto> Handle(UpdateRoomCommand request, CancellationToken cancellationToken)
     {
-        // Check if room with same name already exists
+        var room = await _context.Rooms
+            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+
+        if (room == null)
+        {
+            throw new KeyNotFoundException($"Room with ID {request.Id} not found");
+        }
+
+        // Check if another room with same name exists
         var existingRoom = await _context.Rooms
-            .FirstOrDefaultAsync(r => r.Name.ToLower() == request.Name.ToLower(), cancellationToken);
+            .FirstOrDefaultAsync(r => r.Name.ToLower() == request.Name.ToLower() && r.Id != request.Id, cancellationToken);
 
         if (existingRoom != null)
         {
             throw new InvalidOperationException($"A room with the name '{request.Name}' already exists");
         }
 
-        var room = new Room
-        {
-            Name = request.Name,
-            Location = request.Location,
-            Capacity = request.Capacity,
-            Description = request.Description,
-            Amenities = request.Amenities.Any() ? string.Join(",", request.Amenities) : null,
-            ImageUrls = request.ImageUrls?.Any() == true ? string.Join(",", request.ImageUrls) : null
-        };
+        room.Name = request.Name;
+        room.Location = request.Location;
+        room.Capacity = request.Capacity;
+        room.Description = request.Description;
+        room.Amenities = request.Amenities.Any() ? string.Join(",", request.Amenities) : null;
+        room.ImageUrls = request.ImageUrls?.Any() == true ? string.Join(",", request.ImageUrls) : null;
 
-        _context.Rooms.Add(room);
         await _context.SaveChangesAsync(cancellationToken);
 
         return new RoomDto

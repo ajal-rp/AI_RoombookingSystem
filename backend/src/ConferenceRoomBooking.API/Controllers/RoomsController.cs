@@ -121,4 +121,67 @@ public class RoomsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Update an existing room (Admin only)
+    /// </summary>
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<RoomDto>> UpdateRoom(int id, [FromBody] UpdateRoomCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest(new { message = "Room ID mismatch" });
+        }
+
+        try
+        {
+            var room = await _mediator.Send(command);
+            
+            // Invalidate cache
+            _cache.Remove($"room_{id}");
+            _cache.Remove("rooms___");
+            
+            _logger.LogInformation("Room updated successfully: {RoomId}", id);
+            
+            return Ok(room);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Delete a room (Admin only)
+    /// </summary>
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult> DeleteRoom(int id)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteRoomCommand { Id = id });
+            
+            // Invalidate cache
+            _cache.Remove($"room_{id}");
+            _cache.Remove("rooms___");
+            
+            _logger.LogInformation("Room deleted successfully: {RoomId}", id);
+            
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
